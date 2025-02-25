@@ -255,6 +255,7 @@ class MyApp extends StatelessWidget {
                               ),
                               Text("티노 사용 방법"),
                               Text("회의 기록하기", style: commonTextStyle,),
+                              Text("깃허브 테스트", style: commonTextStyle,),
                             ],
                           )
                       ),
