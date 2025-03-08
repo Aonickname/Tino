@@ -23,6 +23,6 @@ buildscript {
         mavenCentral()  // ✅ Maven 저장소 추가
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.1' // ✅ AGP 버전 설정
+        classpath 'com.android.tools.build:gradle:7.3.0' // ✅ AGP 버전 설정
     }
 }

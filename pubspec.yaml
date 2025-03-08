@@ -29,11 +29,11 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
-#    - assets/images/banner.jpg
-#    - assets/images/new_meeting.jpg
-#    - assets/images/question_tino.jpg
-#    - assets/images/search_tino.jpg
-#    - assets/images/user1.jpg
+    - assets/images/banner.jpg
+    - assets/images/new_meeting.jpg
+    - assets/images/question_tino.jpg
+    - assets/images/search_tino.jpg
+    - assets/images/user1.jpg
 
   uses-material-design: true
 

@@ -13,6 +13,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      backgroundColor: Colors.white,
       currentIndex: selectedIndex, // 현재 선택된 탭 설정
       onTap: onItemTapped, // 탭 변경 시 콜백 함수 호출
       showSelectedLabels: false,
