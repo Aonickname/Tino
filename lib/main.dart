@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/folder_screen.dart';
 import 'screens/schedule_screen.dart';
-import 'screens/profile_screen.dart';
+import 'screens/settings_screen.dart';
 import 'widgets/bottom_navigation.dart';
 
 void main() {
@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     FolderScreen(),
     ScheduleScreen(),
-    ProfileScreen(),
+    SettingScreen(),
   ];
 
   void _onItemTapped(int index) {
