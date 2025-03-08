@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/home_appbar.dart';
+import '../widgets/dialog.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -169,7 +170,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   InkWell(
                                       onTap: () {
-                                        print("새로운 회의 버튼 클릭");
+                                        CustomDialogs.showInputDialogNewMeeting(context, (name, description) {
+                                          print("회의 이름: $name");
+                                          print("회의 설명: $description");
+                                        });
                                       },
                                       child: Column(
                                         children: [
@@ -190,8 +194,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   InkWell(
                                       onTap: () {
-                                        print("녹음 업로드 버튼 클릭");
-                                        // downloadPdf(); //pdf 다운로드 함수 호출
+                                        CustomDialogs.showInputDialogUpload(context, (name, description) {
+                                          print("회의 이름: $name");
+                                          print("회의 설명: $description");
+                                        });
                                       },
                                       child: Column(
                                         children: [
