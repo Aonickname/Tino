@@ -99,7 +99,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, date, events) {
-                DateTime normalizedDate = normalizeDate(date); // ✅ 변수명 수정
+                DateTime normalizedDate = normalizeDate(date);
 
                 if (_meetingEvents.containsKey(normalizedDate)) {
                   return Positioned(
