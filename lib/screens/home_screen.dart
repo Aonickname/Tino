@@ -174,9 +174,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   InkWell(
                                       onTap: () {
-                                        CustomDialogs.showInputDialogNewMeeting(context, (name, description) {
+                                        CustomDialogs.showInputDialogNewMeeting(context, (name, description, date) {
                                           print("회의 이름: $name");
                                           print("회의 설명: $description");
+                                          print("날짜: $date");
                                         });
                                       },
                                       child: Column(
