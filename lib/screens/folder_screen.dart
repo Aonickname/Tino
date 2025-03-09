@@ -7,7 +7,10 @@ class FolderScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('최근 회의 내역'),
+        title: Text('최근 회의 내역',
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold)
+          ),
         backgroundColor: Colors.white,
       ),
 
