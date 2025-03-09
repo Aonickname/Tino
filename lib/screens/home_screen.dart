@@ -87,8 +87,12 @@ class _HomeScreenState extends State<HomeScreen> {
             fit: BoxFit.contain,
           ),
           actions: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-            IconButton(onPressed: () {}, icon: Icon(Icons.notifications_none)),
+            IconButton(onPressed: () {
+              print("search click");
+            }, icon: Icon(Icons.search)),
+            IconButton(onPressed: () {
+              print("notification click");
+            }, icon: Icon(Icons.notifications_none)),
           ],
         ),
 

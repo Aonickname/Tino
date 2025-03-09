@@ -22,6 +22,8 @@ class SettingScreen extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(height: 20),
+
                     Text(
                       '이름',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -34,7 +36,9 @@ class SettingScreen extends StatelessWidget {
                   ],
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    print("로그아웃 완료");
+                  },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.white,
@@ -53,12 +57,14 @@ class SettingScreen extends StatelessWidget {
             _buildSectionTitle('내 정보'),
             _buildListItem('프로필 정보', context, profile_info()),
             _buildListItem('계정 정보', context, account_info()),
+            SizedBox(height: 30),
 
             // 그룹 설정
             _buildSectionTitle('그룹 설정'),
             _buildListItem('속한 그룹 보기', context, view_group()),
             _buildListItem('그룹 생성', context, create_group()),
             _buildListItem('그룹 초대', context, invite_group()),
+            SizedBox(height: 30),
 
             // 기기 설정
             _buildSectionTitle('기기 설정'),

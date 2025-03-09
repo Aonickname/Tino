@@ -19,6 +19,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
       showSelectedLabels: false,
       showUnselectedLabels: false,
       type: BottomNavigationBarType.fixed,
+      selectedItemColor: Colors.black,
+      unselectedItemColor: Colors.grey,
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
         BottomNavigationBarItem(icon: Icon(Icons.folder), label: '폴더'),
