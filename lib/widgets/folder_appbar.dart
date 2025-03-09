@@ -2,74 +2,58 @@ import 'package:flutter/material.dart';
 import '../style.dart';
 import '../screens/folder_screen.dart';
 
-class FolderAppbar extends StatelessWidget {
+class FolderAppbar extends StatefulWidget {
+  @override
+  _FolderAppbarState createState() => _FolderAppbarState();
+}
+
+class _FolderAppbarState extends State<FolderAppbar> {
+  int selectedIndex = 0; // 선택된 버튼의 인덱스를 저장
+
+  final List<String> buttonLabels = ["All", "관심 있는 회의", "진행 중인 회의", "종료된 회의"];
+
   @override
   Widget build(BuildContext context) {
-
-
     return Container(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: [
+          children: List.generate(buttonLabels.length, (index) {
+            bool isSelected = selectedIndex == index;
 
-            SizedBox(width: 8.0),
-
-            OutlinedButton(
-              onPressed: () {
-                print("all");
-              },
-              style: commonButtonStyle,
-              child: Row(
-                children: [
-                  SizedBox(width: 4.0),
-                  Text("All", style: commonTextStyle),
-                ],
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: OutlinedButton(
+                onPressed: () {
+                  setState(() {
+                    selectedIndex = index;
+                  });
+                  print(buttonLabels[index]);
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    isSelected ? Colors.black : Colors.transparent,
+                  ),
+                  foregroundColor: MaterialStateProperty.all(
+                    isSelected ? Colors.white : Colors.black,
+                  ),
+                  side: MaterialStateProperty.all(
+                    BorderSide(color: Colors.black),
+                  ),
+                  padding: MaterialStateProperty.all(
+                    EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  ),
+                ),
+                child: Text(
+                  buttonLabels[index],
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: isSelected ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
-            ),
-
-            SizedBox(width: 8.0),
-            OutlinedButton(
-              onPressed: () {
-                print("interest");
-              },
-              style: commonButtonStyle,
-              child: Row(
-                children: [
-                  SizedBox(width: 4.0),
-                  Text("관심 있는 회의", style: commonTextStyle),
-                ],
-              ),
-            ),
-            SizedBox(width: 8.0),
-
-            OutlinedButton(
-              onPressed: () {
-                print("ing");
-              },
-              style: commonButtonStyle,
-              child: Row(
-                children: [
-                  SizedBox(width: 4.0),
-                  Text("진행 중인 회의", style: commonTextStyle),
-                ],
-              ),
-            ),
-            SizedBox(width: 8.0),
-
-            OutlinedButton(
-              onPressed: () {
-                print("done");
-              },
-              style: commonButtonStyle,
-              child: Row(
-                children: [
-                  SizedBox(width: 4.0),
-                  Text("종료된 회의", style: commonTextStyle),
-                ],
-              ),
-            ),
-          ],
+            );
+          }),
         ),
       ),
     );
