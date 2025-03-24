@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
 import '../style.dart';
 import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'dart:convert';  //JSON 파싱
-import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:convert'; // JSON 파싱
+import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/home_appbar.dart';
 import '../widgets/dialog.dart';
-
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,6 +17,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController(initialPage: 0);
   int currentPage = 0;
   Timer? _timer;
+
+  bool _isLatestFirst = true; // 최신순 기본
 
   @override
   void initState() {
@@ -54,25 +49,34 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  Future<Map<String, dynamic>> loadMeetingsFromJson() async {
+    String jsonString = await rootBundle.loadString('assets/meetings.json');
+    return json.decode(jsonString);
+  }
+
+  String getImageForMeeting(String title) {
+    if (title.contains("티노")) return "assets/images/search_tino.jpg";
+    if (title.contains("설계")) return "assets/images/question_tino.jpg";
+    return "assets/images/user1.jpg";
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
       scrollBehavior: MaterialScrollBehavior().copyWith(
-        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.stylus, PointerDeviceKind.unknown},
+        dragDevices: {
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.unknown
+        },
       ),
-
       debugShowCheckedModeBanner: false,
-
-
-
       theme: ThemeData(
         bottomNavigationBarTheme: bottomNavBarTheme,
       ),
-
       home: Scaffold(
         backgroundColor: Colors.white,
-
         appBar: AppBar(
           backgroundColor: Colors.white,
           title: Text(
@@ -95,225 +99,221 @@ class _HomeScreenState extends State<HomeScreen> {
             }, icon: Icon(Icons.notifications_none)),
           ],
         ),
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            children: [
+              HomeAppBarWidget(),
+              SizedBox(height: 16.0),
 
-
-
-        body: Container(
-
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              children: [
-                HomeAppBarWidget(),
-
-                SizedBox(height: 16.0),
-
-                Container(
-                  height: 200,
-                  padding: EdgeInsets.symmetric(horizontal: 16),// 배너 높이 설정
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20), // 모서리 둥글게 설정
-                        child: PageView(
+              Container(
+                height: 200,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: PageView(
+                        controller: _pageController,
+                        children: [
+                          Image.asset("assets/images/banner1.jpg", fit: BoxFit.cover),
+                          Image.asset("assets/images/banner2.jpg", fit: BoxFit.cover),
+                          Image.asset("assets/images/banner3.jpg", fit: BoxFit.cover),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 10,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: SmoothPageIndicator(
                           controller: _pageController,
+                          count: 3,
+                          effect: ExpandingDotsEffect(
+                            activeDotColor: Colors.blue,
+                            dotHeight: 5,
+                            dotWidth: 5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 16.0),
+
+              Container(
+                child: Column(
+                  children: [
+                    SizedBox(height: 16.0),
+                    Row(
+                      children: [
+                        SizedBox(width: 8.0),
+                        Text(
+                          'Title',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: Colors.black),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        SizedBox(width: 20),
+                        Container(
+                          child: Column(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  CustomDialogs.showInputDialogNewMeeting(
+                                      context, (name, description, date) {
+                                    print("회의 이름: $name");
+                                    print("회의 설명: $description");
+                                    print("날짜: $date");
+                                  });
+                                },
+                                child: Column(
+                                  children: [
+                                    Image.asset("assets/images/new_meeting.jpg", width: 150, height: 150),
+                                    Text('새로운 회의', style: commonTextStyle),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 20),
+                        Container(
+                          child: Column(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  CustomDialogs.showInputDialogUpload(
+                                      context, (name, description) {
+                                    print("회의 이름: $name");
+                                    print("회의 설명: $description");
+                                  });
+                                },
+                                child: Column(
+                                  children: [
+                                    Image.asset("assets/images/mp3_upload.jpg", width: 150, height: 150),
+                                    Text('녹음 업로드', style: commonTextStyle),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 10),
+
+              Container(
+
+                child: Column(
+                  children: [
+                    SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
                           children: [
-                            Image.asset("assets/images/banner1.jpg", fit: BoxFit.cover),
-                            Image.asset("assets/images/banner2.jpg", fit: BoxFit.cover),
-                            Image.asset("assets/images/banner3.jpg", fit: BoxFit.cover),
+                            SizedBox(width: 8.0),
+                            Text(
+                              '최근 회의 내역',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Icon(Icons.chevron_right, color: Colors.black),
                           ],
                         ),
-                      ),
-                      Positioned(
-                        bottom: 10,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: SmoothPageIndicator(
-                            controller: _pageController,
-                            count: 3, // 배너 개수
-                            effect: ExpandingDotsEffect(
-                              activeDotColor: Colors.blue,
-                              dotHeight: 5,
-                              dotWidth: 5,
-                            ),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _isLatestFirst = !_isLatestFirst;
+                            });
+                          },
+                          icon: Icon(
+                            _isLatestFirst ? Icons.arrow_downward : Icons.arrow_upward,
+                            color: Colors.black,
+                            size: 18,
+                          ),
+                          label: Text(
+                            _isLatestFirst ? "최신순" : "오래된순",
+                            style: TextStyle(color: Colors.black),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+                      ],
+                    ),
 
-                SizedBox(height: 16.0),
+                    FutureBuilder<Map<String, dynamic>>(
+                      future: loadMeetingsFromJson(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        }
 
-                Container(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 16.0),
-                      Row(
-                        children: [
-                          SizedBox(width: 8.0),
-                          Text(
-                            'Title',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: Colors.black),
-                        ],
-                      ),
+                        if (!snapshot.hasData) {
+                          return Center(child: Text("회의 데이터를 불러올 수 없습니다."));
+                        }
 
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          SizedBox(width: 20),
-                          Container(
-                              child: Column(
-                                children: [
-                                  InkWell(
-                                      onTap: () {
-                                        CustomDialogs.showInputDialogNewMeeting(context, (name, description, date) {
-                                          print("회의 이름: $name");
-                                          print("회의 설명: $description");
-                                          print("날짜: $date");
-                                        });
-                                      },
-                                      child: Column(
-                                        children: [
-                                          Image.asset("assets/images/new_meeting.jpg", width: 150, height: 150,),
-                                          Text('새로운 회의', style: commonTextStyle,)
-                                        ],
-                                      )
+                        final data = snapshot.data!;
+                        final sortedDates = data.keys.toList()
+                          ..sort((a, b) => _isLatestFirst
+                              ? b.compareTo(a)  // 최신순
+                              : a.compareTo(b)); // 오래된순
 
-                                  ),
-                                ],
-
-                              )
-                          ),
-
-                          SizedBox(width: 20),
-                          Container(
-                              child: Column(
-                                children: [
-                                  InkWell(
-                                      onTap: () {
-                                        CustomDialogs.showInputDialogUpload(context, (name, description) {
-                                          print("회의 이름: $name");
-                                          print("회의 설명: $description");
-                                        });
-                                      },
-                                      child: Column(
-                                        children: [
-                                          Image.asset("assets/images/mp3_upload.jpg", width: 150, height: 150,),
-                                          Text('녹음 업로드', style: commonTextStyle,)
-                                        ],
-                                      )
-
-                                  ),
-                                ],
-
-                              )
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-
-
-                SizedBox(height: 10),
-                Container(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 16.0),
-                      Row(
-                        children: [
-                          SizedBox(width: 8.0),
-                          Text(
-                            '최근 회의 내역',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: Colors.black),
-                        ],
-                      ),
-
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            SizedBox(width: 20),
-                            Container(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Image(
-                                      image: AssetImage("assets/images/question_tino.jpg"),
-                                      width: 200,
-                                      height: 200,
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              SizedBox(width: 20),
+                              ...sortedDates.expand((date) {
+                                List<dynamic> meetings = data[date];
+                                return meetings.map((meetingTitle) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Image.asset(
+                                          getImageForMeeting(meetingTitle),
+                                          width: 200,
+                                          height: 200,
+                                        ),
+                                        Text(meetingTitle),
+                                        Text(date, style: commonTextStyle),
+                                      ],
                                     ),
-                                    Text("종합설계기획"),
-                                    Text("새로운 회의", style: commonTextStyle,),
-                                  ],
-                                )
-                            ),
-
-                            Container(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Image(
-                                      image: AssetImage("assets/images/search_tino.jpg"),
-                                      width: 200,
-                                      height: 200,
-                                    ),
-                                    Text("티노 사용 방법"),
-                                    Text("회의 기록하기", style: commonTextStyle,),
-                                  ],
-                                )
-                            ),
-
-                            Container(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Image(
-                                      image: AssetImage("assets/images/user1.jpg"),
-                                      width: 200,
-                                      height: 200,
-                                    ),
-                                    Text("Test2"),
-                                    Text("Test", style: commonTextStyle,),
-                                  ],
-                                )
-                            ),
-
-                            SizedBox(width: 20),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                                  );
+                                });
+                              }).toList(),
+                              SizedBox(width: 20),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-
-              ],
-            ),
-
+              ),
+            ],
           ),
         ),
-
-
-
-
-
-
       ),
     );
   }
 }
-
