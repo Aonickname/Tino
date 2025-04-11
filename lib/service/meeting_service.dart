@@ -7,7 +7,7 @@ class MeetingService {
     try {
       // 서버에서 JSON 데이터 가져오기
       final response = await http.get(
-          Uri.parse('http://127.0.0.1:8000/meetings'));
+          Uri.parse('http://3.35.184.31:8000/meetings'));
 
       // HTTP 응답 상태 코드 확인
       if (response.statusCode == 200) {

@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //LTS GET: json
   Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
-    final url = 'http://127.0.0.1:8000/meetings';
+    final url = 'http://3.35.184.31:8000/meetings';
 
     try {
       final response = await http.get(Uri.parse(url)); // GET 요청을 보냄
@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //LTS POST: json
   Future<void> saveMeetingToServer(String name, String description, String date) async {
-    final url = Uri.parse('http://127.0.0.1:8000/meetings');
+    final url = Uri.parse('http://3.35.184.31:8000/meetings');
 
     final body = {
       "name": name,
