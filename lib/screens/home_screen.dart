@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async';
 import '../widgets/home_appbar.dart';
 import '../widgets/dialog.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -49,10 +50,21 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  // Future<Map<String, dynamic>> loadMeetingsFromJson() async {
+  //   String jsonString = await rootBundle.loadString('assets/meetings.json');
+  //   return json.decode(jsonString);
+  // }
+
   Future<Map<String, dynamic>> loadMeetingsFromJson() async {
-    String jsonString = await rootBundle.loadString('assets/meetings.json');
-    return json.decode(jsonString);
+    final response = await http.get(Uri.parse("http://127.0.0.1:8000/meetings"));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception("회의 데이터를 불러오는 데 실패했습니다.");
+    }
   }
+
 
   String getImageForMeeting(String title) {
     if (title.contains("티노")) return "assets/images/search_tino.jpg";
