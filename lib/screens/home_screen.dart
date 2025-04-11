@@ -8,6 +8,7 @@ import 'dart:async';
 import '../widgets/home_appbar.dart';
 import '../widgets/dialog.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -50,21 +51,93 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  //LTS에서 meeting.json 읽어오기
   // Future<Map<String, dynamic>> loadMeetingsFromJson() async {
-  //   String jsonString = await rootBundle.loadString('assets/meetings.json');
-  //   return json.decode(jsonString);
+  //   final response = await http.get(Uri.parse("http://127.0.0.1:8000/meetings"));
+  //
+  //   if (response.statusCode == 200) {
+  //     return jsonDecode(response.body) as Map<String, dynamic>;
+  //   } else {
+  //     throw Exception("회의 데이터를 불러오는 데 실패했습니다.");
+  //   }
   // }
 
-  Future<Map<String, dynamic>> loadMeetingsFromJson() async {
-    final response = await http.get(Uri.parse("http://127.0.0.1:8000/meetings"));
+  //LTS GET: json
+  Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
+    final url = 'http://127.0.0.1:8000/meetings';
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
-    } else {
-      throw Exception("회의 데이터를 불러오는 데 실패했습니다.");
+    try {
+      final response = await http.get(Uri.parse(url)); // GET 요청을 보냄
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> json = jsonDecode(response.body); // JSON 디코딩
+
+        // 이미지 리스트
+        final List<String> images = [
+          'assets/images/User1.jpg',
+          'assets/images/User2.jpg',
+          'assets/images/User3.jpg',
+          'assets/images/User4.jpg',
+        ];
+        int imageIndex = 0;
+
+        print('JSON 데이터: $json'); // 로드된 JSON 데이터 출력
+
+        return json.map((key, value) {
+          List<Map<String, String>> meetings = (value as List).map((item) {
+            final meeting = {
+              "name": item["name"] as String,
+              "description": item["description"] as String,
+              "image": images[imageIndex % images.length], // 이미지 순환
+            };
+            imageIndex++;
+            return meeting;
+          }).toList();
+
+          return MapEntry(key, meetings);
+        });
+      } else {
+        throw Exception('서버에서 데이터를 가져오지 못했습니다.');
+      }
+    } catch (e) {
+      print('Error loading data: $e'); // 에러 로그 출력
+      throw Exception('회의 데이터를 불러올 수 없습니다.');
     }
   }
 
+
+  //LTS POST: json
+  Future<void> saveMeetingToServer(String name, String description, String date) async {
+    final url = Uri.parse('http://127.0.0.1:8000/meetings');
+
+    final body = {
+      "name": name,
+      "description": description,
+      "date": date,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        print("회의 저장 완료!");
+      } else {
+        print("서버 오류: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("에러 발생: $e");
+    }
+  }
+
+  //날짜 포매팅
+  String formatDate(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);  // 날짜 문자열을 DateTime 객체로 변환
+    return DateFormat('yyyy-MM-dd').format(dateTime);  // 원하는 형식으로 포맷
+  }
 
   String getImageForMeeting(String title) {
     if (title.contains("티노")) return "assets/images/search_tino.jpg";
@@ -180,15 +253,29 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(width: 20),
                         Container(
                           child: Column(
+                            
+                            //새로운 회의 버튼
                             children: [
                               InkWell(
-                                onTap: () {
+                                onTap: () async {
+                                  // 다이얼로그 호출
                                   CustomDialogs.showInputDialogNewMeeting(
-                                      context, (name, description, date) {
-                                    print("회의 이름: $name");
-                                    print("회의 설명: $description");
-                                    print("날짜: $date");
-                                  });
+                                    context,
+                                        (name, description, date) async {
+                                      print("회의 이름: $name");
+                                      print("회의 설명: $description");
+                                      print("날짜: $date");
+
+                                      // 서버에 새로운 회의 추가
+                                      await saveMeetingToServer(name, description, date.toIso8601String());
+
+                                      // 화면 갱신
+                                      setState(() {
+                                        // 이 부분에서 회의 데이터를 새로 가져와서 리스트를 업데이트 할 수 있음
+                                        // 예시: meetings = getUpdatedMeetings();
+                                      });
+                                    },
+                                  );
                                 },
                                 child: Column(
                                   children: [
@@ -196,7 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text('새로운 회의', style: commonTextStyle),
                                   ],
                                 ),
-                              ),
+                              )
+                              ,
                             ],
                           ),
                         ),
@@ -271,11 +359,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
 
-                    FutureBuilder<Map<String, dynamic>>(
+
+                    
+                    //회의 데이터 출력
+                    FutureBuilder<Map<String, List<Map<String, String>>>>(
                       future: loadMeetingsFromJson(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Center(child: CircularProgressIndicator());
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(child: Text("에러: ${snapshot.error}"));
                         }
 
                         if (!snapshot.hasData) {
@@ -284,9 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         final data = snapshot.data!;
                         final sortedDates = data.keys.toList()
-                          ..sort((a, b) => _isLatestFirst
-                              ? b.compareTo(a)  // 최신순
-                              : a.compareTo(b)); // 오래된순
+                          ..sort((a, b) => _isLatestFirst ? b.compareTo(a) : a.compareTo(b));
 
                         return SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
@@ -294,20 +387,26 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               SizedBox(width: 20),
                               ...sortedDates.expand((date) {
-                                List<dynamic> meetings = data[date];
-                                return meetings.map((meetingTitle) {
+                                List<Map<String, String>> meetings = data[date]!;
+                                return meetings.map((meeting) {
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 10),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Image.asset(
-                                          getImageForMeeting(meetingTitle),
+                                          meeting["image"] ?? 'assets/images/default.jpg', // ← 고정된 이미지 사용!
                                           width: 200,
                                           height: 200,
                                         ),
-                                        Text(meetingTitle),
-                                        Text(date, style: commonTextStyle),
+                                        Text(
+                                          meeting["name"] ?? "회의 이름 없음",
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+                                        Text(meeting["description"] ?? "설명 없음",
+                                          style: commonTextStyle,),
+                                        Text(
+                                          formatDate(date),
+                                          style: commonTextStyle,),
                                       ],
                                     ),
                                   );
