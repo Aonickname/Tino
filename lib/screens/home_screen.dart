@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   //LTS POST: json
-  Future<void> saveMeetingToServer(String name, String description, String date, {bool is_interested = false}) async {
+  Future<void> saveMeetingToServer(String name, String description, String date, {bool is_interested = false, bool is_ended = false}) async {
     final url = Uri.parse('http://3.35.184.31:8000/meetings');
 
     final body = {
@@ -115,6 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
       "description": description,
       "date": date,
       "is_interested": is_interested,
+      "is_ended": is_ended,
     };
 
     print('Request Body: $body');
@@ -271,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       print("날짜: $date");
 
                                       // 서버에 새로운 회의 추가
-                                      await saveMeetingToServer(name, description, date.toIso8601String(), is_interested: false);
+                                      await saveMeetingToServer(name, description, date.toIso8601String(), is_interested: false, is_ended: false);
 
                                       // 화면 갱신
                                       setState(() {
