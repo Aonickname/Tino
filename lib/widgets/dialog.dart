@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
 class CustomDialogs {
   // 기본 다이얼로그
@@ -23,105 +25,225 @@ class CustomDialogs {
   }
 
   // 확인 / 취소 다이얼로그
+  // static void showInputDialogUpload(BuildContext context,
+  //     Function(String, String) onSubmit) {
+  //   TextEditingController nameController = TextEditingController();
+  //   TextEditingController descriptionController = TextEditingController();
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         backgroundColor: Colors.white,
+  //         titleTextStyle: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+  //         contentTextStyle: TextStyle(color: Colors.black87),
+  //
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(10), // 테두리 둥글게
+  //         ),
+  //         title: Text("새로운 회의"),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min, // 다이얼로그 크기 자동 조절
+  //           children: [
+  //             // 회의 이름 입력 필드 (X 버튼 추가)
+  //             TextField(
+  //               controller: nameController,
+  //               decoration: InputDecoration(
+  //                 hintText: "새로운 회의(이름)",
+  //
+  //                 hintStyle: TextStyle(color: Colors.grey),
+  //                 focusedBorder: UnderlineInputBorder(
+  //                     borderSide: BorderSide(color: Colors.black)
+  //                 ),
+  //                 enabledBorder: UnderlineInputBorder(
+  //                     borderSide: BorderSide(color: Colors.grey)
+  //                 ),
+  //
+  //                 suffixIcon: nameController.text.isNotEmpty
+  //                     ? IconButton(
+  //                   icon: Icon(Icons.clear),
+  //                   onPressed: () {
+  //                     nameController.clear();
+  //                   },
+  //                 )
+  //                     : null,
+  //               ),
+  //               onChanged: (text) {
+  //                 // X 버튼 업데이트를 위해 다이얼로그 다시 빌드
+  //                 (context as Element).markNeedsBuild();
+  //               },
+  //             ),
+  //             SizedBox(height: 10),
+  //
+  //             // 회의 설명 입력 필드 (X 버튼 추가)
+  //             TextField(
+  //               controller: descriptionController,
+  //               decoration: InputDecoration(
+  //                 hintText: "회의 설명",
+  //
+  //                 hintStyle: TextStyle(color: Colors.grey),
+  //                 focusedBorder: UnderlineInputBorder(
+  //                     borderSide: BorderSide(color: Colors.black)
+  //                 ),
+  //                 enabledBorder: UnderlineInputBorder(
+  //                     borderSide: BorderSide(color: Colors.grey)
+  //                 ),
+  //
+  //                 suffixIcon: descriptionController.text.isNotEmpty
+  //                     ? IconButton(
+  //                   icon: Icon(Icons.clear),
+  //                   onPressed: () {
+  //                     descriptionController.clear();
+  //                   },
+  //                 )
+  //                     : null,
+  //               ),
+  //               onChanged: (text) {
+  //                 // X 버튼 업데이트를 위해 다이얼로그 다시 빌드
+  //                 (context as Element).markNeedsBuild();
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.pop(context),
+  //             style: TextButton.styleFrom(
+  //               foregroundColor: Colors.black,
+  //             ),
+  //             child: Text("취소"),
+  //           ),
+  //           ElevatedButton(
+  //             onPressed: () {
+  //               onSubmit(nameController.text, descriptionController.text);
+  //               Navigator.pop(context);
+  //             },
+  //             style: TextButton.styleFrom(
+  //               foregroundColor: Colors.black,
+  //             ),
+  //             child: Text("확인"),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+
   static void showInputDialogUpload(BuildContext context,
-      Function(String, String) onSubmit) {
+      Function(String, String, File?) onSubmit) {
+
     TextEditingController nameController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
+    File? selectedFile;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          titleTextStyle: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-          contentTextStyle: TextStyle(color: Colors.black87),
-
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10), // 테두리 둥글게
-          ),
-          title: Text("새로운 회의"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min, // 다이얼로그 크기 자동 조절
-            children: [
-              // 회의 이름 입력 필드 (X 버튼 추가)
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: "새로운 회의(이름)",
-
-                  hintStyle: TextStyle(color: Colors.grey),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black)
+        return StatefulBuilder( // <- 이게 있어야 파일 선택 후 UI 갱신됨
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("새로운 회의"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 회의 이름 입력
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      hintText: "새로운 회의(이름)",
+                      suffixIcon: nameController.text.isNotEmpty
+                          ? IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          nameController.clear();
+                          setState(() {});
+                        },
+                      )
+                          : null,
+                    ),
+                    onChanged: (text) => setState(() {}),
                   ),
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey)
-                  ),
+                  SizedBox(height: 10),
 
-                  suffixIcon: nameController.text.isNotEmpty
-                      ? IconButton(
-                    icon: Icon(Icons.clear),
-                    onPressed: () {
-                      nameController.clear();
+                  // 회의 설명 입력
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      hintText: "회의 설명",
+                      suffixIcon: descriptionController.text.isNotEmpty
+                          ? IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          descriptionController.clear();
+                          setState(() {});
+                        },
+                      )
+                          : null,
+                    ),
+                    onChanged: (text) => setState(() {}),
+                  ),
+                  SizedBox(height: 20),
+
+                  // 🔊 mp3 파일 선택
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.audiotrack, color: Colors.black),
+                    label: Text("mp3 파일 선택", style: TextStyle(color: Colors.black)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(color: Colors.grey),
+                      ),
+                    ),
+                    onPressed: () async {
+                      FilePickerResult? result =
+                      await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['mp3'],
+                      );
+
+                      if (result != null && result.files.single.path != null) {
+                        setState(() {
+                          selectedFile = File(result.files.single.path!);
+                        });
+                      }
                     },
-                  )
-                      : null,
-                ),
-                onChanged: (text) {
-                  // X 버튼 업데이트를 위해 다이얼로그 다시 빌드
-                  (context as Element).markNeedsBuild();
-                },
-              ),
-              SizedBox(height: 10),
-
-              // 회의 설명 입력 필드 (X 버튼 추가)
-              TextField(
-                controller: descriptionController,
-                decoration: InputDecoration(
-                  hintText: "회의 설명",
-
-                  hintStyle: TextStyle(color: Colors.grey),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black)
                   ),
-                  enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey)
-                  ),
-
-                  suffixIcon: descriptionController.text.isNotEmpty
-                      ? IconButton(
-                    icon: Icon(Icons.clear),
-                    onPressed: () {
-                      descriptionController.clear();
-                    },
-                  )
-                      : null,
+                  if (selectedFile != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Text(
+                        "선택된 파일: ${selectedFile!.path.split('/').last}",
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black,),
+                  child: Text("취소"),
                 ),
-                onChanged: (text) {
-                  // X 버튼 업데이트를 위해 다이얼로그 다시 빌드
-                  (context as Element).markNeedsBuild();
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black,
-              ),
-              child: Text("취소"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                onSubmit(nameController.text, descriptionController.text);
-                Navigator.pop(context);
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black,
-              ),
-              child: Text("확인"),
-            ),
-          ],
+                ElevatedButton(
+                  onPressed: () {
+                    onSubmit(nameController.text, descriptionController.text, selectedFile);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black, // 글자 색
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  child: Text("확인"),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -219,6 +341,8 @@ class CustomDialogs {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,),
               child: Text("취소"),
             ),
             ElevatedButton(
@@ -232,6 +356,13 @@ class CustomDialogs {
                   );
                 }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black, // 글자 색
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
               child: Text("확인"),
             ),
           ],

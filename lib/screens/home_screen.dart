@@ -51,28 +51,21 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  //LTS에서 meeting.json 읽어오기
-  // Future<Map<String, dynamic>> loadMeetingsFromJson() async {
-  //   final response = await http.get(Uri.parse("http://127.0.0.1:8000/meetings"));
-  //
-  //   if (response.statusCode == 200) {
-  //     return jsonDecode(response.body) as Map<String, dynamic>;
-  //   } else {
-  //     throw Exception("회의 데이터를 불러오는 데 실패했습니다.");
-  //   }
-  // }
-
   //LTS GET: json
   Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
-    final url = 'http://3.35.184.31:8000/meetings';
-
     try {
-      final response = await http.get(Uri.parse(url)); // GET 요청을 보냄
+      final url = 'https://7ccf-182-219-240-41.ngrok-free.app/meetings'; //ngrok 사용
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> json = jsonDecode(response.body); // JSON 디코딩
+        final Map<String, dynamic> json = jsonDecode(response.body);
 
-        // 이미지 리스트
         final List<String> images = [
           'assets/images/User1.jpg',
           'assets/images/User2.jpg',
@@ -81,14 +74,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ];
         int imageIndex = 0;
 
-        print('JSON 데이터: $json'); // 로드된 JSON 데이터 출력
-
         return json.map((key, value) {
           List<Map<String, String>> meetings = (value as List).map((item) {
             final meeting = {
               "name": item["name"] as String,
               "description": item["description"] as String,
-              "image": images[imageIndex % images.length], // 이미지 순환
+              "image": images[imageIndex % images.length],
             };
             imageIndex++;
             return meeting;
@@ -100,15 +91,18 @@ class _HomeScreenState extends State<HomeScreen> {
         throw Exception('서버에서 데이터를 가져오지 못했습니다.');
       }
     } catch (e) {
-      print('Error loading data: $e'); // 에러 로그 출력
+      print('Error loading data: $e');
       throw Exception('회의 데이터를 불러올 수 없습니다.');
     }
   }
 
 
+
   //LTS POST: json
   Future<void> saveMeetingToServer(String name, String description, String date, {bool is_interested = false, bool is_ended = false}) async {
-    final url = Uri.parse('http://3.35.184.31:8000/meetings');
+    // final url = Uri.parse('http://34.22.86.69:8000/meetings');
+    final url = Uri.parse('https://7ccf-182-219-240-41.ngrok-free.app/meetings'); //ngrok 사용
+
 
     final body = {
       "name": name,
@@ -118,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
       "is_ended": is_ended,
     };
 
-    print('Request Body: $body');
 
     try {
       final response = await http.post(
@@ -294,17 +287,22 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         SizedBox(width: 20),
+                        
+                        //녹음 업로드 버튼
                         Container(
                           child: Column(
                             children: [
                               InkWell(
-                                onTap: () {
-                                  CustomDialogs.showInputDialogUpload(
-                                      context, (name, description) {
-                                    print("회의 이름: $name");
-                                    print("회의 설명: $description");
-                                  });
-                                },
+                                  onTap: () {
+                                    CustomDialogs.showInputDialogUpload(
+                                      context,
+                                          (name, description, file) {
+                                        print("회의 이름: $name");
+                                        print("회의 설명: $description");
+                                        print("파일 경로: ${file?.path}");
+                                      },
+                                    );
+                                  },
                                 child: Column(
                                   children: [
                                     Image.asset("assets/images/mp3_upload.jpg", width: 150, height: 150),

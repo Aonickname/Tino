@@ -1,0 +1,56 @@
+{
+  "2025-04-12T00:00:00.000": [
+    {
+      "name": "정기 회의",
+      "description": "3차 발표 대비",
+      "is_interested": false
+    }
+  ],
+  "2025-05-01T00:00:00.000": [
+    {
+      "name": "3차 발표",
+      "description": "데모 및 프로젝트 설명",
+      "is_interested": true
+    }
+  ],
+  "2025-03-24T00:00:00.000": [
+    {
+      "name": "2차 발표 대비 회의",
+      "description": "2차 설계서 보완제출",
+      "is_interested": false
+    }
+  ],
+  "2025-03-27T00:00:00.000": [
+    {
+      "name": "2차 발표 재심",
+      "description": "시연 또는 기능 구현",
+      "is_interested": true
+    }
+  ],
+  "2025-03-04T00:00:00.000": [
+    {
+      "name": "Git주소 업로드",
+      "description": "깃허브 주소 업로드",
+      "is_interested": false
+    }
+  ],
+  "2025-03-12T00:00:00.000": [
+    {
+      "name": "팀플 회의",
+      "description": "업무 배정"
+    }
+  ],
+  "2025-04-14T00:00:00.000": [
+    {
+      "name": "Jaehoon",
+      "description": ""
+    }
+  ],
+  "2025-04-17T00:00:00.000": [
+    {
+      "name": "테스트회의",
+      "description": "테스트회의"
+    }
+  ]
+  
+}

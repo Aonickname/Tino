@@ -7,7 +7,11 @@ class MeetingService {
     try {
       // 서버에서 JSON 데이터 가져오기
       final response = await http.get(
-          Uri.parse('http://3.35.184.31:8000/meetings'));
+          //Uri.parse('http://34.22.86.69:8000/meetings'));
+          Uri.parse('https://7ccf-182-219-240-41.ngrok-free.app/meetings'),
+          headers: {
+            'ngrok-skip-browser-warning': 'true', // ✅ 요 한 줄이 핵심!
+          },); //ngrok 사용
 
       // HTTP 응답 상태 코드 확인
       if (response.statusCode == 200) {

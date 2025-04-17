@@ -12,7 +12,12 @@ class FolderAppbar extends StatefulWidget {
 class _FolderAppbarState extends State<FolderAppbar> {
   int selectedIndex = 0;
 
-  final List<String> buttonLabels = ["All", "관심 있는 회의", "진행 중인 회의", "종료된 회의"];
+  final List<String> buttonLabels = [
+    "All",
+    "관심 있는 회의",
+    "진행 중인 회의",
+    "종료된 회의"
+  ];
 
   @override
   Widget build(BuildContext context) {

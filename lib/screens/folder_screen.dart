@@ -4,10 +4,14 @@ import 'dart:convert';
 import '../widgets/folder_appbar.dart';
 
 Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
-  final url = 'http://3.35.184.31:8000/meetings';
+  // final url = 'http://34.22.86.69:8000/meetings';
+  final url = 'https://7ccf-182-219-240-41.ngrok-free.app/meetings'; //ngrok 사용
 
   try {
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(url),
+      headers: {
+        'ngrok-skip-browser-warning': 'true', // ngrok 에서 경고 html 생략
+      },);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
@@ -27,6 +31,7 @@ Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
             "description": item["description"] as String,
             "image": images[imageIndex % images.length],
             "is_interested": item["is_interested"].toString(),
+            "is_ended": item["is_ended"].toString(), // is_ended 추가
           };
           imageIndex++;
           return meeting;
@@ -59,7 +64,7 @@ class FolderScreen extends StatefulWidget {
 
 class _FolderScreenState extends State<FolderScreen> {
   bool _isLatestFirst = true;
-  int _selectedIndex = 0; // 필터 인덱스 상태 추가
+  int _selectedIndex = 0; // ← 필터 인덱스 상태 추가
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +138,12 @@ class _FolderScreenState extends State<FolderScreen> {
                         final filteredMeetings = meetings.where((meeting) {
                           if (_selectedIndex == 1) {
                             return meeting["is_interested"] == "true";
+                          }
+                          if (_selectedIndex == 2) {
+                            return meeting["is_ended"] == "false"; // 진행 중인 회의
+                          }
+                          if (_selectedIndex == 3) {
+                            return meeting["is_ended"] == "true"; // 종료된 회의
                           }
                           return true;
                         }).toList();

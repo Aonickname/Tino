@@ -1,0 +1,79 @@
+INFO:     Started server process [6949]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     182.219.240.41:46507 - "GET /meetings HTTP/1.1" 200 OK
+INFO:     182.219.240.41:46508 - "GET /meetings HTTP/1.1" 200 OK
+INFO:     216.218.206.118:25161 - "GET / HTTP/1.1" 404 Not Found
+INFO:     216.218.206.98:38579 - "CONNECT www.shadowserver.org%3A443 HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     45.55.42.239:35128 - "GET / HTTP/1.1" 404 Not Found
+INFO:     45.55.42.239:35140 - "GET /login HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     3.137.209.162:52028 - "GET / HTTP/1.1" 404 Not Found
+INFO:     3.137.209.162:57980 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     205.210.31.86:60690 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     134.122.30.157:34208 - "GET /aaa9 HTTP/1.1" 404 Not Found
+INFO:     134.122.30.157:34222 - "GET /aab8 HTTP/1.1" 404 Not Found
+INFO:     134.122.30.157:54946 - "GET / HTTP/1.1" 404 Not Found
+INFO:     64.62.156.54:46099 - "GET / HTTP/1.1" 404 Not Found
+INFO:     64.62.156.60:23991 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     64.62.156.61:32161 - "GET http%3A//api.ipify.org/?format=json HTTP/1.1" 404 Not Found
+INFO:     64.62.156.54:3253 - "CONNECT www.shadowserver.org%3A443 HTTP/1.1" 404 Not Found
+INFO:     63.42.199.127:48921 - "GET / HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     91.196.152.73:32785 - "GET / HTTP/1.1" 404 Not Found
+INFO:     91.196.152.162:39775 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     13.56.234.43:42598 - "GET / HTTP/1.1" 404 Not Found
+INFO:     68.56.210.4:62361 - "GET / HTTP/1.0" 404 Not Found
+INFO:     143.110.182.33:37894 - "GET /aaa9 HTTP/1.1" 404 Not Found
+INFO:     143.110.182.33:37908 - "GET /aab8 HTTP/1.1" 404 Not Found
+INFO:     143.110.182.33:37922 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     205.210.31.144:61110 - "GET / HTTP/1.1" 404 Not Found
+INFO:     20.150.206.165:40922 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     182.219.240.41:50499 - "GET /meetings HTTP/1.1" 200 OK
+INFO:     182.219.240.41:50499 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     45.58.159.108:50214 - "GET / HTTP/1.1" 404 Not Found
+INFO:     45.58.159.108:50224 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     138.68.82.39:43898 - "GET / HTTP/1.1" 404 Not Found
+INFO:     138.68.82.39:43908 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     104.234.115.115:60756 - "GET / HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:56272 - "GET /manage/account/login HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:44882 - "GET /admin/index.html HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:59294 - "GET /index.html HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:48206 - "GET /%2BCSCOE%2B/logon.html HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:38572 - "GET /cgi-bin/login.cgi HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:48180 - "GET /login.htm HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:55164 - "GET /login.html HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:53818 - "GET /login.jsp HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:35198 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:43940 - "GET /doc/index.html HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:42392 - "GET /remote/login HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:55382 - "GET //admin/login.asp HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:44012 - "GET /web/ HTTP/1.1" 404 Not Found
+INFO:     104.234.115.115:33836 - "GET //webpages/login.html HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.204:60516 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     162.243.223.234:45146 - "GET / HTTP/1.1" 404 Not Found
+INFO:     162.243.223.234:45152 - "GET /login HTTP/1.1" 404 Not Found
+INFO:     185.247.137.157:57779 - "GET / HTTP/1.1" 404 Not Found
+INFO:     103.203.57.20:35374 - "GET / HTTP/1.1" 404 Not Found

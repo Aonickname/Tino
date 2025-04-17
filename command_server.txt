@@ -1,0 +1,10 @@
+open
+nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+
+
+close
+ps aux | grep uvicorn
+
+kill -9 PID
+
+pkill uvicorn
