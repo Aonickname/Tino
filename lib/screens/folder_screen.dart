@@ -4,6 +4,27 @@ import 'dart:convert';
 import '../widgets/folder_appbar.dart';
 import 'detail_screen.dart';
 
+// 서버에서 회의 데이터를 삭제하는 함수
+Future<void> deleteMeetingFromServer(String directory) async {
+  final url = 'https://amoeba-national-mayfly.ngrok-free.app/delete/$directory';
+
+  try {
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('삭제 실패');
+    }
+  } catch (e) {
+    print('삭제 중 오류 발생: $e');
+  }
+}
+
+
 
 // 서버에서 회의 데이터를 불러오는 함수
 Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
@@ -192,23 +213,72 @@ class _FolderScreenState extends State<FolderScreen> {
                                     height: 200,
                                   ),
                                   SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        meeting["name"] ?? "회의 이름 없음",
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                      ),
-                                      Text(
-                                        meeting["description"] ?? "설명 없음",
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                      Text(
-                                        formatDate(date),
-                                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                                      ),
-                                    ],
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          meeting["name"] ?? "회의 이름 없음",
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                        ),
+                                        Text(
+                                          meeting["description"] ?? "설명 없음",
+                                          style: TextStyle(fontSize: 14),
+                                        ),
+                                        Text(
+                                          formatDate(date),
+                                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                  IconButton(
+                                    icon: Icon(Icons.close, color: Colors.red),
+                                    onPressed: () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                          title: Text('새로운 회의'),
+                                          content: Text('이 회의 데이터를 삭제하면 복구할 수 없습니다.'),
+                                          actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                          actionsAlignment: MainAxisAlignment.spaceEvenly,
+                                          actions: [
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.of(context).pop(false),
+                                              style: ElevatedButton.styleFrom(
+                                                foregroundColor: Colors.black,
+                                                backgroundColor: Colors.grey[200],
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                minimumSize: Size(100, 40),
+                                              ),
+                                              child: Text('취소'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.of(context).pop(true),
+                                              style: ElevatedButton.styleFrom(
+                                                foregroundColor: Colors.white,
+                                                backgroundColor: Colors.black,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                minimumSize: Size(100, 40),
+                                              ),
+                                              child: Text('삭제'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+
+                                      if (confirm == true) {
+                                        await deleteMeetingFromServer(meeting["directory"] ?? "");
+                                        setState(() {}); // 새로고침
+                                      }
+                                    },
+                                  ),
+
                                 ],
                               ),
                             ),
