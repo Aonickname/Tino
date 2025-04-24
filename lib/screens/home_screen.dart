@@ -1,4 +1,3 @@
-// 생략된 import 부분은 동일
 import 'package:flutter/material.dart';
 import '../style.dart';
 import 'dart:ui';
@@ -26,10 +25,12 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLatestFirst = true;
 
   @override
+  @override
   void initState() {
     super.initState();
     _startAutoScroll();
   }
+
 
   void _startAutoScroll() {
     _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
@@ -53,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _pageController.dispose();
     super.dispose();
   }
+
 
   Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
     try {
@@ -343,13 +345,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Image.asset(meeting["image"]!, width: 200, height: 200),
+
+                                          // 회의 제목/설명/날짜
                                           Text(meeting["name"] ?? "회의 이름 없음",
                                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                          Text(meeting["description"] ?? "설명 없음",
-                                              style: commonTextStyle),
+                                          Text(meeting["description"] ?? "설명 없음", style: commonTextStyle),
                                           Text(formatDate(date), style: commonTextStyle),
                                         ],
                                       ),
+
                                     ),
                                   );
                                 });

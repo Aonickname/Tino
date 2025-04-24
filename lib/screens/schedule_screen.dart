@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../../service/meeting_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'detail_screen.dart';
 
 class ScheduleScreen extends StatefulWidget {
@@ -11,24 +12,45 @@ class ScheduleScreen extends StatefulWidget {
 class _ScheduleScreenState extends State<ScheduleScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
-  Map<DateTime, List<String>> _meetingEvents = {};
+  Map<DateTime, List<Map<String, String>>> _meetingEvents = {};
 
   DateTime normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
 
   void _loadMeetings() async {
-    Map<DateTime, List<String>> meetings = await MeetingService.loadMeetings();
-    setState(() {
-      _meetingEvents = meetings;
-    });
-    print("📅 불러온 일정 데이터: $_meetingEvents");
-  }
+    final response = await http.get(
+      Uri.parse("https://amoeba-national-mayfly.ngrok-free.app/meetings"),
+      headers: {'ngrok-skip-browser-warning': 'true'},
+    );
 
-  @override
-  void initState() {
-    super.initState();
-    _loadMeetings();
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      Map<DateTime, List<Map<String, String>>> meetings = {};
+
+      data.forEach((dateStr, meetingList) {
+        DateTime date = DateTime.parse(dateStr);
+        List<Map<String, String>> list = [];
+
+        for (var item in meetingList) {
+          list.add({
+            "name": item["name"] ?? "",
+            "description": item["description"] ?? "",
+            "directory": item["directory"] ?? "",
+          });
+        }
+
+        meetings[date] = list;
+      });
+
+      setState(() {
+        _meetingEvents = meetings;
+      });
+
+      print("📅 일정 데이터 불러옴: $_meetingEvents");
+    } else {
+      print("서버 오류: ${response.statusCode}");
+    }
   }
 
   void _goToToday() {
@@ -36,6 +58,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       _selectedDay = DateTime.now();
       _focusedDay = DateTime.now();
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMeetings();
   }
 
   @override
@@ -116,24 +144,24 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     children: _meetingEvents[normalizeDate(_selectedDay)]!
                         .map((event) => ListTile(
                       leading: Icon(Icons.event_note, color: Colors.blue),
-                      title: Text(event, style: TextStyle(fontSize: 16)),
-                        onTap: () {
-                          String title = event.split('\n').first;
-                          String description = event.split('\n').skip(1).join('\n');
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailScreen(
-                                name: title,
-                                description: description.isNotEmpty ? description : "설명이 없습니다.",
-                                date: "${_selectedDay.year}-${_selectedDay.month.toString().padLeft(2, '0')}-${_selectedDay.day.toString().padLeft(2, '0')}",
-                                directory: "", // 또는 null-safe하게 기본 빈값 전달
-                              ),
-
+                      title: Text(event["name"] ?? ""),
+                      subtitle: Text(event["description"] ?? ""),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailScreen(
+                              name: event["name"] ?? "",
+                              description: event["description"]?.isNotEmpty == true
+                                  ? event["description"]!
+                                  : "설명이 없습니다.",
+                              date:
+                              "${_selectedDay.year}-${_selectedDay.month.toString().padLeft(2, '0')}-${_selectedDay.day.toString().padLeft(2, '0')}",
+                              directory: event["directory"] ?? "",
                             ),
-                          );
-                        }
+                          ),
+                        );
+                      },
                     ))
                         .toList(),
                   )

@@ -37,10 +37,12 @@ Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
           final meeting = {
             "name": item["name"] as String,
             "description": item["description"] as String,
-            "image": images[imageIndex % images.length], // 이미지 순환
+            "directory": item["directory"]?.toString() ?? "",
+            "image": images[imageIndex % images.length],
             "is_interested": item["is_interested"].toString(),
-            "is_ended": item["is_ended"].toString(), // 종료 여부도 추가
+            "is_ended": item["is_ended"].toString(),
           };
+
           imageIndex++;
           return meeting;
         }).toList();
