@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'detail_screen.dart';
+import 'record_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -139,14 +140,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return "assets/images/user1.jpg";
   }
 
-  Future<void> uploadMeetingWithFile(String name, String description, File file, DateTime date) async {
+
+  Future<void> uploadMeetingWithFile(String name, String description, File file, DateTime date, String summaryMode, String customPrompt) async {
     final url = Uri.parse('https://amoeba-national-mayfly.ngrok-free.app/upload');
 
     var request = http.MultipartRequest('POST', url)
       ..fields['name'] = name
       ..fields['description'] = description
       ..fields['date'] = date.toIso8601String()
-      ..files.add(await http.MultipartFile.fromPath('file', file.path));
+      ..fields['summary_mode'] = summaryMode
+      ..fields['custom_prompt'] = customPrompt  // 사용자 지정 텍스트
+      ..files.add(await http.MultipartFile.fromPath('file', file.path)
+      );
 
     try {
       final response = await request.send();
@@ -234,8 +239,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       CustomDialogs.showInputDialogNewMeeting(
                         context,
                             (name, description, date) async {
+                          // 여기까지 제목, 설명, 날짜 입력 완료한 거야
+
+                          // 1. 서버에 회의 데이터 저장
                           await saveMeetingToServer(name, description, date.toIso8601String());
-                          setState(() {});
+
+                          // 2. 저장 끝나고, 바로 record_screen.dart로 이동
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RecordScreen(
+                                meetingName: name,
+                                meetingDescription: description,
+                                meetingDate: date,
+                              ),
+                            ),
+                          );
                         },
                       );
                     },
@@ -246,14 +265,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+
                   SizedBox(width: 20),
                   InkWell(
                     onTap: () {
                       CustomDialogs.showInputDialogUpload(
                         context,
-                            (name, description, file, date) async {
+                            (name, description, file, date, summaryMode, customPrompt) async {
                           if (file != null) {
-                            await uploadMeetingWithFile(name, description, file, date);
+                            await uploadMeetingWithFile(name, description, file, date, summaryMode, customPrompt);
                             setState(() {});
                           } else {
                             print("파일이 선택되지 않았습니다.");

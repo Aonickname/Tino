@@ -232,6 +232,30 @@ class _FolderScreenState extends State<FolderScreen> {
                                       ],
                                     ),
                                   ),
+                                  // ⭐ 별 아이콘 추가 여기!
+                                  IconButton(
+                                    icon: Icon(
+                                      meeting["is_interested"] == "true" ? Icons.star : Icons.star_border,
+                                      color: Colors.amber,
+                                    ),
+                                    onPressed: () async {
+                                      final newStatus = meeting["is_interested"] != "true";
+                                      final response = await http.patch(
+                                        Uri.parse('https://amoeba-national-mayfly.ngrok-free.app/meetings/interested'),
+                                        headers: {"Content-Type": "application/json"},
+                                        body: jsonEncode({
+                                          "directory": meeting["directory"],
+                                          "is_interested": newStatus,
+                                        }),
+                                      );
+                                      if (response.statusCode == 200) {
+                                        setState(() {}); // UI 새로고침
+                                      } else {
+                                        print("관심 상태 업데이트 실패");
+                                      }
+                                    },
+                                  ),
+                                  // 삭제 버튼
                                   IconButton(
                                     icon: Icon(Icons.close, color: Colors.red),
                                     onPressed: () async {
@@ -268,19 +292,17 @@ class _FolderScreenState extends State<FolderScreen> {
                                               ),
                                               child: Text('삭제'),
                                             ),
-                                          ],
-                                        ),
+                                          ],),
                                       );
-
                                       if (confirm == true) {
                                         await deleteMeetingFromServer(meeting["directory"] ?? "");
-                                        setState(() {}); // 새로고침
+                                        setState(() {});
                                       }
                                     },
                                   ),
-
                                 ],
                               ),
+
                             ),
                           );
 

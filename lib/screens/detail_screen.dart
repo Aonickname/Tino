@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
+
+
 
 String formatTime(dynamic seconds) {
   final int min = (seconds ~/ 60).toInt();
@@ -21,13 +26,16 @@ class DetailScreen extends StatefulWidget {
     required this.directory,
   });
 
+
+
+
   @override
   _DetailScreenState createState() => _DetailScreenState();
 }
 
 class _DetailScreenState extends State<DetailScreen> {
   List<Map<String, dynamic>> segments = [];//result.json 출력 변수
-  String summaryText ="";//summary.json 출력 변수
+  String summaryText ="";//summaFry.json 출력 변수
 
   bool isExpanded = false;
 
@@ -35,6 +43,51 @@ class _DetailScreenState extends State<DetailScreen> {
   void initState() {
     super.initState();
     fetchResultJson();
+  }
+
+  //pdf 다운로드 함수
+  void downloadPdf() async {
+    final url = "https://amoeba-national-mayfly.ngrok-free.app/pdf/${Uri.encodeComponent(widget.directory)}";
+
+    // ✅ 저장 권한 요청
+    final status = await Permission.storage.request();
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("저장 권한이 필요합니다.")),
+      );
+      return;
+    }
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final bytes = response.bodyBytes;
+
+      // ✅ 공용 Download 폴더로 저장
+      final downloadDir = Directory("/storage/emulated/0/Download");
+      if (!await downloadDir.exists()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("다운로드 폴더를 찾을 수 없습니다.")),
+        );
+        return;
+      }
+
+      String sanitizedName = widget.name
+          .replaceAll(RegExp(r'[\\/:*?"<>|]'), '') // 파일명에 쓸 수 없는 문자 제거
+          .replaceAll(' ', '_');                  // 띄어쓰기는 _로 변경
+
+      final file = File("${downloadDir.path}/${widget.name}_회의록.pdf");
+
+      await file.writeAsBytes(bytes);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("PDF 다운로드 완료: ${file.path}")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("PDF 다운로드 실패")),
+      );
+    }
   }
 
   //result 읽어오기
@@ -95,6 +148,24 @@ class _DetailScreenState extends State<DetailScreen> {
             SizedBox(height: 8),
             Text("날짜: ${widget.date}"),
             SizedBox(height: 16),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: downloadPdf,
+                  icon: Icon(Icons.download),
+                  label: Text("회의록 다운로드", style: TextStyle(fontSize: 12)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[200],
+                    foregroundColor: Colors.black,
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    textStyle: TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+
 
             ExpansionTile(
               title: Text("회의 요약", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),

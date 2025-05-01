@@ -6,9 +6,15 @@ import 'package:file_picker/file_picker.dart';
 
 class CustomDialogs {
   static void showInputDialogUpload(
-      BuildContext context, Function(String, String, File?, DateTime) onSubmit) {
+
+    BuildContext context, Function(String, String, File?, DateTime, String, String) onSubmit) {
     TextEditingController nameController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
+
+
+    String selectedOption = '기본 회의록 방식으로 요약';
+    TextEditingController customSummaryController = TextEditingController();
+
     File? selectedFile;
     DateTime? selectedDate;
 
@@ -118,7 +124,36 @@ class CustomDialogs {
                               style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                             ),
                           ),
-                    ],
+
+// 콤보박스 추가
+            DropdownButton<String>(
+            value: selectedOption,
+            onChanged: (String? newValue) {
+            setState(() {
+            selectedOption = newValue!;
+            });
+            },
+            items: [
+            '기본 회의록 방식으로 요약',
+            '사용자 지정 요약'
+            ].map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+            );
+            }).toList(),
+            ),
+
+// 사용자가 직접 요약방식을 입력하는 칸 (선택되었을 때만 표시)
+            if (selectedOption == '사용자 지정 요약')
+            TextField(
+            controller: customSummaryController,
+            decoration: InputDecoration(hintText: "요약 프롬프트 입력"),
+            ),
+
+
+
+            ],
                   ),
                 ),
               ),
@@ -131,7 +166,15 @@ class CustomDialogs {
                 ElevatedButton(
                   onPressed: () {
                     if (selectedDate != null) {
-                      onSubmit(nameController.text, descriptionController.text, selectedFile, selectedDate!);
+                      onSubmit(
+                        nameController.text,
+                        descriptionController.text,
+                        selectedFile,
+                        selectedDate!,
+                        selectedOption,
+                        customSummaryController.text
+                      );
+
                       Navigator.pop(context);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
