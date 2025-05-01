@@ -24,8 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
 
   bool _isLatestFirst = true;
-
-  @override
+  
   @override
   void initState() {
     super.initState();
