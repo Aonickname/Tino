@@ -21,6 +21,11 @@ dependencies:
   table_calendar: ^3.0.9
   speech_to_text: ^7.0.0
   permission_handler: ^11.0.1
+  google_speech: ^2.1.0
+  flutter_sound: ^9.2.13+1
+  web_socket_channel: ^2.4.0
+
+
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
@@ -39,6 +44,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/icon/
+#    - assets/credentials.json
 #    - assets/images/banner1.jpg
 #    - assets/images/banner2.jpg
 #    - assets/images/banner3.jpg

@@ -5,23 +5,12 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:async';
 
 
-class RecordScreen extends StatefulWidget {
-  final String meetingName;
-  final String meetingDescription;
-  final DateTime meetingDate;
-
-  const RecordScreen({
-    Key? key,
-    required this.meetingName,
-    required this.meetingDescription,
-    required this.meetingDate,
-  }) : super(key: key);
-
+class AzureSTTScreen extends StatefulWidget {
   @override
-  State<RecordScreen> createState() => _RecordScreenState();
+  _AzureSTTScreenState createState() => _AzureSTTScreenState();
 }
 
-class _RecordScreenState extends State<RecordScreen> {
+class _AzureSTTScreenState extends State<AzureSTTScreen> {
   late FlutterSoundRecorder _recorder;
   late WebSocketChannel _channel;
   bool isRecording = false;

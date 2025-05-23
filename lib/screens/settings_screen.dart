@@ -3,7 +3,7 @@ import 'package:tino/screens/home_screen.dart';
 import 'settings/profile_info.dart';
 import 'settings/device_setting.dart';
 import 'settings/group_setting.dart';
-
+import './azure_stt_test.dart';
 
 class SettingScreen extends StatelessWidget {
   @override
@@ -71,11 +71,25 @@ class SettingScreen extends StatelessWidget {
             _buildListItem('연결 기기', context, connecting_device()),
             _buildListItem('화면 설정', context, screen_setting()),
             _buildListItem('음성 데이터 저장 관리', context, voicedata()),
+
+            SizedBox(height: 30),
+            ElevatedButton(
+                onPressed: (){
+                  Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AzureSTTScreen()),
+                  );
+                },
+                child: Text("Azure STT Test")
+            ),
+            SizedBox(height: 30),
+
           ],
         ),
       ),
     );
   }
+
+
 
   Widget _buildSectionTitle(String title) {
     return Padding(

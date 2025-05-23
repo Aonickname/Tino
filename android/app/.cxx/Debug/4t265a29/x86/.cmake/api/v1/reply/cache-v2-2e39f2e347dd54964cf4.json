@@ -11,7 +11,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "arm64-v8a"
+			"value" : "x86"
 		},
 		{
 			"name" : "ANDROID_NDK",
@@ -63,7 +63,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "arm64-v8a"
+			"value" : "x86"
 		},
 		{
 			"name" : "CMAKE_ANDROID_NDK",
@@ -139,7 +139,7 @@
 				}
 			],
 			"type" : "STRING",
-			"value" : "RelWithDebInfo"
+			"value" : "Debug"
 		},
 		{
 			"name" : "CMAKE_CACHEFILE_DIR",
@@ -151,7 +151,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "c:/Users/sebin/Desktop/Tino/android/app/.cxx/RelWithDebInfo/5xm215z2/arm64-v8a"
+			"value" : "c:/Users/sebin/Desktop/Tino/android/app/.cxx/Debug/4t265a29/x86"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -527,7 +527,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "C:/mingw64/bin/dlltool.exe"
+			"value" : "C:/MinGW/bin/dlltool.exe"
 		},
 		{
 			"name" : "CMAKE_ERROR_DEPRECATED",
@@ -751,7 +751,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "C:\\Users\\sebin\\Desktop\\Tino\\build\\app\\intermediates\\cxx\\RelWithDebInfo\\5xm215z2\\obj\\arm64-v8a"
+			"value" : "C:\\Users\\sebin\\Desktop\\Tino\\build\\app\\intermediates\\cxx\\Debug\\4t265a29\\obj\\x86"
 		},
 		{
 			"name" : "CMAKE_LINKER",
@@ -1023,7 +1023,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "C:\\Users\\sebin\\Desktop\\Tino\\build\\app\\intermediates\\cxx\\RelWithDebInfo\\5xm215z2\\obj\\arm64-v8a"
+			"value" : "C:\\Users\\sebin\\Desktop\\Tino\\build\\app\\intermediates\\cxx\\Debug\\4t265a29\\obj\\x86"
 		},
 		{
 			"name" : "CMAKE_SHARED_LINKER_FLAGS",
@@ -1331,7 +1331,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/sebin/Desktop/Tino/android/app/.cxx/RelWithDebInfo/5xm215z2/arm64-v8a"
+			"value" : "C:/Users/sebin/Desktop/Tino/android/app/.cxx/Debug/4t265a29/x86"
 		},
 		{
 			"name" : "Project_IS_TOP_LEVEL",
