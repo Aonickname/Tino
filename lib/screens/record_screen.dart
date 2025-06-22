@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:async';
 
-
 class RecordScreen extends StatefulWidget {
   final String meetingName;
   final String meetingDescription;
@@ -43,7 +42,7 @@ class _RecordScreenState extends State<RecordScreen> {
 
   void startStreaming() async {
     _channel = WebSocketChannel.connect(
-      Uri.parse('wss://amoeba-national-mayfly.ngrok-free.app/azure-stream'),
+      Uri.parse('wss://34.47.125.249:8000/azure-stream'),
     );
 
     _channel.stream.listen((message) {
@@ -54,9 +53,6 @@ class _RecordScreenState extends State<RecordScreen> {
 
     final controller = StreamController<Uint8List>();
 
-    // 로컬 저장용 경로 지정
-    // final dir = await getApplicationDocumentsDirectory();
-    // recordedFilePath = '${dir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
     final dir = await getExternalStorageDirectory();
     final recordingsDir = Directory('${dir!.path}/recordings');
 
@@ -65,7 +61,6 @@ class _RecordScreenState extends State<RecordScreen> {
     }
 
     recordedFilePath = '${recordingsDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
-
 
     await _recorder.startRecorder(
       codec: Codec.pcm16WAV,
@@ -89,7 +84,7 @@ class _RecordScreenState extends State<RecordScreen> {
 
     if (recordedFilePath != null) {
       print("녹음 파일 저장 완료: $recordedFilePath");
-      // 여기에 업로드 함수 연동하면 됨
+      // TODO: 서버 업로드 함수 연동 가능
     }
   }
 
@@ -103,30 +98,47 @@ class _RecordScreenState extends State<RecordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Azure 실시간 전사')),
+      appBar: AppBar(title: Text('실시간 자막 보기')),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: transcriptList.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(transcriptList[index]),
+            child: Container(
+              color: Colors.black,
+              padding: EdgeInsets.all(16),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: SingleChildScrollView(
+                  reverse: true,
+                  child: Text(
+                    transcriptList.join(" "),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: isRecording ? null : startStreaming,
-                child: Text('녹음 시작'),
-              ),
-              SizedBox(width: 20),
-              ElevatedButton(
-                onPressed: isRecording ? stopStreaming : null,
-                child: Text('중지'),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: isRecording ? null : startStreaming,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  child: Text('녹음 시작'),
+                ),
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: isRecording ? stopStreaming : null,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: Text('중지'),
+                ),
+              ],
+            ),
           )
         ],
       ),

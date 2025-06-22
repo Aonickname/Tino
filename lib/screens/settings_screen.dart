@@ -78,12 +78,12 @@ class SettingScreen extends StatelessWidget {
             //테스트화면
             _buildSectionTitle('테스트 화면'),
             ElevatedButton(
-              child: Text("클로바 api 실시간 전사"),
+              child: Text("azure api 실시간 전사"),
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RealtimeSTTWidget(
+                    builder: (context) => AzureSTTPage(
                     ),
                   ),
                 );
