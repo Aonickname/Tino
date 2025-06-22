@@ -6,7 +6,7 @@ import 'detail_screen.dart';
 
 // 서버에서 회의 데이터를 삭제하는 함수
 Future<void> deleteMeetingFromServer(String directory) async {
-  final url = 'https://amoeba-national-mayfly.ngrok-free.app/delete/$directory';
+  final url = 'http://34.47.125.249:8000/delete/$directory';
 
   try {
     final response = await http.delete(
@@ -28,7 +28,7 @@ Future<void> deleteMeetingFromServer(String directory) async {
 
 // 서버에서 회의 데이터를 불러오는 함수
 Future<Map<String, List<Map<String, String>>>> loadMeetingsFromJson() async {
-  final url = 'https://amoeba-national-mayfly.ngrok-free.app/meetings'; // ngrok 주소로 요청
+  final url = 'http://34.47.125.249:8000/meetings'; // ngrok 주소로 요청
 
   try {
     // HTTP GET 요청을 보냄 (브라우저 경고 제거 헤더 포함)
@@ -241,7 +241,7 @@ class _FolderScreenState extends State<FolderScreen> {
                                     onPressed: () async {
                                       final newStatus = meeting["is_interested"] != "true";
                                       final response = await http.patch(
-                                        Uri.parse('https://amoeba-national-mayfly.ngrok-free.app/meetings/interested'),
+                                        Uri.parse('http://34.47.125.249:8000/meetings/interested'),
                                         headers: {"Content-Type": "application/json"},
                                         body: jsonEncode({
                                           "directory": meeting["directory"],

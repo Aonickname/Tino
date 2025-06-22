@@ -20,7 +20,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   void _loadMeetings() async {
     final response = await http.get(
-      Uri.parse("https://amoeba-national-mayfly.ngrok-free.app/meetings"),
+      Uri.parse("http://34.47.125.249:8000/meetings"),
       headers: {'ngrok-skip-browser-warning': 'true'},
     );
 

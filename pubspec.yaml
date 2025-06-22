@@ -24,6 +24,9 @@ dependencies:
   google_speech: ^2.1.0
   flutter_sound: ^9.2.13+1
   web_socket_channel: ^2.4.0
+  record: ^5.0.0
+  fl_chart: ^1.0.0
+
 
 
 
