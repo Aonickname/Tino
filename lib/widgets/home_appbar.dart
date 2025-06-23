@@ -5,7 +5,7 @@ import '../screens/folder_screen.dart';
 class HomeAppBarWidget extends StatelessWidget {
   final List<Map<String, dynamic>> buttons = [
     {
-      "icon": Icons.favorite_outline,
+      "icon": Icons.star_outline,
       "text": "관심 있는 회의",
     },
     {

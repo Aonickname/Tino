@@ -232,7 +232,6 @@ class _FolderScreenState extends State<FolderScreen> {
                                       ],
                                     ),
                                   ),
-                                  // ⭐ 별 아이콘 추가 여기!
                                   IconButton(
                                     icon: Icon(
                                       meeting["is_interested"] == "true" ? Icons.star : Icons.star_border,
