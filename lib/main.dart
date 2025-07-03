@@ -22,8 +22,6 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-//git hub fetch test
-
 // 로컬 푸시 알림 플러그인 전역 선언
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
