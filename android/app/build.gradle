@@ -13,6 +13,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -30,6 +31,11 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
+
+    dependencies {
+           // Java 8 desugaring 지원 라이브러리
+                    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+        }
 
     buildTypes {
         release {

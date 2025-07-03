@@ -78,30 +78,68 @@ class CustomDialogs {
                       SizedBox(height: 10),
 
                       // 날짜 선택 ListTile
-                      ListTile(
-                        title: Text(
-                          selectedDate == null
-                              ? '날짜를 선택하세요'
-                              : DateFormat('yyyy-MM-dd').format(selectedDate!),
-                          style: TextStyle(color: Colors.black87),
-                        ),
-                        trailing: Icon(Icons.calendar_today),
-                        onTap: () async {
-                          // 날짜 선택기 표시
-                          DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2101),
-                          );
-                          if (pickedDate != null && pickedDate != selectedDate) {
-                            setState(() {
-                              selectedDate = pickedDate;
-                            });
-                          }
-                        },
+                      // ListTile(
+                      //   title: Text(
+                      //     selectedDate == null
+                      //         ? '날짜를 선택하세요'
+                      //         : DateFormat('yyyy-MM-dd').format(selectedDate!),
+                      //     style: TextStyle(color: Colors.black87),
+                      //   ),
+                      //   trailing: Icon(Icons.calendar_today),
+                      //   onTap: () async {
+                      //     // 날짜 선택기 표시
+                      //     DateTime? pickedDate = await showDatePicker(
+                      //       context: context,
+                      //       initialDate: DateTime.now(),
+                      //       firstDate: DateTime(2000),
+                      //       lastDate: DateTime(2101),
+                      //     );
+                      //     if (pickedDate != null && pickedDate != selectedDate) {
+                      //       setState(() {
+                      //         selectedDate = pickedDate;
+                      //       });
+                      //     }
+                      //   },
+                      // ),
+                    ListTile(
+                      title: Text(
+                        selectedDate == null
+                            ? '날짜를 선택하세요'
+                            : DateFormat('yyyy-MM-dd').format(selectedDate!),
+                        style: TextStyle(color: Colors.black87),
                       ),
-                      SizedBox(height: 10),
+                      trailing: Icon(Icons.calendar_today),
+                      onTap: () async {
+                        // 날짜 선택기 표시 (배경 흰색 커스터마이징)
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2101),
+                          builder: (BuildContext ctx, Widget? child) {
+                            return Theme(
+                              data: ThemeData.light().copyWith(
+                                dialogBackgroundColor: Colors.white,
+                                colorScheme: ColorScheme.light(
+                                  primary: Colors.blue,    // 헤더 배경
+                                  onPrimary: Colors.white, // 헤더 텍스트
+                                  surface: Colors.white,   // 달력 표면
+                                  onSurface: Colors.black, // 날짜 글자
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (pickedDate != null && pickedDate != selectedDate) {
+                          setState(() {
+                            selectedDate = pickedDate;
+                          });
+                        }
+                      },
+                    ),
+
+                    SizedBox(height: 10),
 
                       // MP3 파일 선택 버튼
                       ElevatedButton.icon(
@@ -142,6 +180,7 @@ class CustomDialogs {
                       // 요약 방식 드롭다운
                       DropdownButton<String>(
                         value: selectedOption,
+                        dropdownColor: Colors.white,
                         onChanged: (String? newValue) {
                           setState(() {
                             selectedOption = newValue!;
