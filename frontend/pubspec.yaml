@@ -1,0 +1,67 @@
+name: tino
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  carousel_slider: ^4.2.1
+  smooth_page_indicator: ^1.0.0+2
+  http: ^0.13.0
+  path_provider: ^2.0.11
+  intl: ^0.18.1
+  file_picker: ^8.0.0
+  table_calendar: ^3.0.9
+  speech_to_text: ^7.0.0
+  permission_handler: ^11.0.1
+  google_speech: ^2.1.0
+  flutter_sound: ^9.2.13+1
+  web_socket_channel: ^2.4.0
+  record: ^5.0.0
+  fl_chart: ^1.0.0
+  flutter_local_notifications: ^18.0.1
+  unorm_dart: ^0.3.1+1
+  mysql_client: ^0.0.27
+  sqflite: ^2.2.8
+  flutter_dotenv: ^5.2.1
+
+
+
+
+
+dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/Icon.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/images/
+    - assets/icon/
+    - .env
+#    - assets/credentials.json
+#    - assets/images/banner1.jpg
+#    - assets/images/banner2.jpg
+#    - assets/images/banner3.jpg
+#    - assets/images/new_meeting.jpg
+#    - assets/images/question_tino.jpg
+#    - assets/images/search_tino.jpg
+#    - assets/images/User1.jpg
+#    - assets/images/User2.jpg
+#    - assets/images/User3.jpg
+#    - assets/images/User4.jpg

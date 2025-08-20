@@ -1,0 +1,27 @@
+{
+  "2025-06-21T00:00:00.000": [
+    {
+      "name": "대선후보 토론회",
+      "description": "유튜브 영상 분석",
+      "is_interested": true,
+      "is_ended": true,
+      "directory": "20250623_145329_대선후보_토론회_e0053a"
+    }
+  ],
+  "2025-06-23T00:00:00.000": [
+    {
+      "name": "저녁 메뉴 선정",
+      "description": "저녁 메뉴 선정",
+      "is_interested": false,
+      "is_ended": true,
+      "directory": "20250624_072003_저녁_메뉴_선정_4746c8"
+    },
+    {
+      "name": "test",
+      "description": "메뉴선정",
+      "is_interested": false,
+      "is_ended": true,
+      "directory": "20250624_072255_test_869531"
+    }
+  ]
+}

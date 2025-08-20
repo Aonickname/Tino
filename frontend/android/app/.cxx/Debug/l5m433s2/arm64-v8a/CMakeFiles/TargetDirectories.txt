@@ -1,0 +1,2 @@
+C:/Users/sebin/Desktop/Tino/android/app/.cxx/Debug/l5m433s2/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/sebin/Desktop/Tino/android/app/.cxx/Debug/l5m433s2/arm64-v8a/CMakeFiles/rebuild_cache.dir

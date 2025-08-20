@@ -1,0 +1,2 @@
+C:/Users/sebin/Desktop/Tino/android/app/.cxx/RelWithDebInfo/5xm215z2/x86/CMakeFiles/edit_cache.dir
+C:/Users/sebin/Desktop/Tino/android/app/.cxx/RelWithDebInfo/5xm215z2/x86/CMakeFiles/rebuild_cache.dir

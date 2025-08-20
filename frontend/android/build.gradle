@@ -1,0 +1,28 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+
+buildscript {
+    repositories {
+        google()  // ✅ Google 저장소 추가
+        mavenCentral()  // ✅ Maven 저장소 추가
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.3.0' // ✅ AGP 버전 설정
+    }
+}

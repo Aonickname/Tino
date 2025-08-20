@@ -1,0 +1,11 @@
+framework module record_darwin {
+  umbrella header "record_darwin-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module record_darwin.Swift {
+  header "record_darwin-Swift.h"
+  requires objc
+}
