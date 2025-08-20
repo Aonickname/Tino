@@ -1,4 +1,4 @@
-#!/home/bysws302/tino/tino/bin/python3
+#!/Users/sebin/Desktop/coding/Tino/backend/tino/bin/python3.11
 # -*- coding: utf-8 -*-
 import re
 import sys
