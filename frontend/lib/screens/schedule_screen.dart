@@ -25,8 +25,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     final response = await http.get(
 
-      Uri.parse("$baseUrl/meetings"),
-      headers: {'ngrok-skip-browser-warning': 'true'},
+      Uri.parse("$baseUrl/api/meetings"),
     );
 
     if (response.statusCode == 200) {

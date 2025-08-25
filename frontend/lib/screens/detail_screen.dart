@@ -110,40 +110,78 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> downloadPdf() async {
-    if (!await Permission.storage.request().isGranted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('저장 권한이 필요합니다.')));
-      return;
-    }
-    final baseUrl = dotenv.env['API_BASE_URL'];
-    final resp = await http.get(Uri.parse(
-        '$baseUrl/pdf/${Uri.encodeComponent(widget.directory)}'
-    ));
-    if (resp.statusCode==200) {
-      final dl = Directory('/storage/emulated/0/Download');
-      if (!await dl.exists()) {
+    // iOS에서는 저장 권한이 필요 없습니다. (앱 문서 폴더 사용)
+    // 안드로이드에서만 필요합니다.
+    if (Platform.isAndroid) {
+      if (!await Permission.storage.request().isGranted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('다운로드 폴더를 찾을 수 없습니다.')));
+            .showSnackBar(SnackBar(content: Text('저장 권한이 필요합니다.')));
         return;
       }
+    }
+
+    final baseUrl = dotenv.env['API_BASE_URL'];
+    final resp = await http.get(Uri.parse(
+        '$baseUrl/api/pdf/${Uri.encodeComponent(widget.directory)}'
+    ));
+
+    if (resp.statusCode == 200) {
+      // 파일명 정리
       final name = widget.name
           .replaceAll(RegExp(r'[\\/:*?"<>|]'),'')
           .replaceAll(' ','_');
-      final file = File('${dl.path}/${name}_회의록.pdf');
+
+      // 플랫폼에 따라 저장 폴더 경로를 가져옵니다.
+      // iOS의 경우 getApplicationDocumentsDirectory() 사용
+      final dir = await getApplicationDocumentsDirectory();
+
+      // 파일 객체 생성 및 바이트 쓰기
+      final file = File('${dir.path}/${name}_회의록.pdf');
       await file.writeAsBytes(resp.bodyBytes);
+
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('PDF 다운로드 완료')));
+
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패')));
     }
   }
+  // Future<void> downloadPdf() async {
+  //   if (!await Permission.storage.request().isGranted) {
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text('저장 권한이 필요합니다.')));
+  //     return;
+  //   }
+  //   final baseUrl = dotenv.env['API_BASE_URL'];
+  //   final resp = await http.get(Uri.parse(
+  //       '$baseUrl/api/pdf/${Uri.encodeComponent(widget.directory)}'
+  //   ));
+  //   if (resp.statusCode==200) {
+  //     final dl = Directory('/storage/emulated/0/Download');
+  //     if (!await dl.exists()) {
+  //       ScaffoldMessenger.of(context)
+  //           .showSnackBar(SnackBar(content: Text('다운로드 폴더를 찾을 수 없습니다.')));
+  //       return;
+  //     }
+  //     final name = widget.name
+  //         .replaceAll(RegExp(r'[\\/:*?"<>|]'),'')
+  //         .replaceAll(' ','_');
+  //     final file = File('${dl.path}/${name}_회의록.pdf');
+  //     await file.writeAsBytes(resp.bodyBytes);
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text('PDF 다운로드 완료')));
+  //   } else {
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패')));
+  //   }
+  // }
 
   Future<void> fetchResultJson() async {
     final baseUrl = dotenv.env['API_BASE_URL'];
 
     final resp = await http.get(Uri.parse(
-        '$baseUrl/result/${Uri.encodeComponent(widget.directory)}'
+        '$baseUrl/api/result/${Uri.encodeComponent(widget.directory)}'
     ));
     if (resp.statusCode==200) {
       final data = json.decode(utf8.decode(resp.bodyBytes));

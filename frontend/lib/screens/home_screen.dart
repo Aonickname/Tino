@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;                          // 자동 스크롤을 위한 타이머
 
   bool _isLatestFirst = true;            // 회의 목록을 최신순/오래된순 토글
-ㅂ
+
   @override
   void initState() {
     super.initState();
@@ -67,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {'ngrok-skip-browser-warning': 'true'},
       );
 
       if (response.statusCode == 200) {
@@ -163,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
       String customPrompt
       ) async {
     final baseUrl = dotenv.env['API_BASE_URL'];
-    final url = Uri.parse('$baseUrl/upload');
+    final url = Uri.parse('$baseUrl/api/upload');
 
     var request = http.MultipartRequest('POST', url)
       ..fields['name'] = name

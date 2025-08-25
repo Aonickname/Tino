@@ -11,7 +11,7 @@ Future<void> deleteMeetingFromServer(String directory) async {
 
   final baseUrl = dotenv.env['API_BASE_URL'];
 
-  final url = '$baseUrl/delete/$directory';
+  final url = '$baseUrl/api/delete/$directory';
 
   try {
     final response = await http.delete(
