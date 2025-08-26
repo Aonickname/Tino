@@ -101,6 +101,8 @@ class _MainScreenState extends State<MainScreen> {
 
     final notificationUrl = dotenv.env['NOTIFICATION_WEBSOCKET_URL'];
 
+    _requestIOSPermissions();
+
     // WebSocket 연결
     _wsChannel = IOWebSocketChannel.connect(
       notificationUrl!,
@@ -119,10 +121,27 @@ class _MainScreenState extends State<MainScreen> {
               importance: Importance.high,
               priority: Priority.high,
             ),
+            iOS: const DarwinNotificationDetails(
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+            ),
           ),
         );
       }
     });
+  }
+
+  // IOS 요약 완료 알림
+  void _requestIOSPermissions() {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
   @override

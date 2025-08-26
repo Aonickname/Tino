@@ -175,23 +175,3 @@ class ClovaSpeechClient:
             url=self.invoke_url + '/recognizer/upload',
             files=files
         )
-
-
-# # 로컬 테스트용
-# if __name__ == "__main__":
-#     # 실제 summary.json 경로 설정
-#     json_path = "uploaded_files/20250621_135715_d_9008da/summary.json"
-#     pdf_path  = "uploaded_files/20250621_135715_d_9008da/summary.pdf"
-
-#     if not os.path.exists(json_path):
-#         print(f"ERROR: '{json_path}' 파일을 찾을 수 없습니다.")
-#         exit(1)
-
-#     with open(json_path, "r", encoding="utf-8") as f:
-#         data = json.load(f)
-#     summary_text = data.get("summary") or data.get("text") or ""
-#     if not summary_text:
-#         print("ERROR: JSON에 'summary' 또는 'text' 필드가 없습니다.")
-#         exit(1)
-
-#     save_summary_as_pdf(summary_text, pdf_path)
