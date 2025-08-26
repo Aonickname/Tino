@@ -325,6 +325,20 @@ class CustomDialogs {
                     initialDate: DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2101),
+                    builder: (BuildContext ctx, Widget? child) {
+                      return Theme(
+                        data: ThemeData.light().copyWith(
+                          dialogBackgroundColor: Colors.white,
+                          colorScheme: ColorScheme.light(
+                            primary: Colors.blue,    // 헤더 배경
+                            onPrimary: Colors.white, // 헤더 텍스트
+                            surface: Colors.white,   // 달력 표면
+                            onSurface: Colors.black, // 날짜 글자
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
                   );
                   if (pickedDate != null && pickedDate != selectedDate) {
                     selectedDate = pickedDate;
@@ -365,4 +379,144 @@ class CustomDialogs {
       },
     );
   }
+
+  static void showInputDialogEdit(
+      BuildContext context,
+      String originalName, // 기존 회의 이름
+      String originalDescription, // 기존 회의 설명
+      String directory, // 고유한 폴더 이름
+      Function(String name, String description, DateTime date, String directory) onSubmit
+      ) {
+    TextEditingController nameController = TextEditingController(text: originalName);
+    TextEditingController descriptionController = TextEditingController(text: originalDescription);
+    DateTime? selectedDate = DateTime.now();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          titleTextStyle: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+          contentTextStyle: TextStyle(color: Colors.black87),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          title: Text("회의 내용 수정"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 회의 이름 입력
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  hintText: "회의 제목(이름)",
+                  hintStyle: TextStyle(color: Colors.grey),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                  suffixIcon: nameController.text.isNotEmpty
+                      ? IconButton(
+                    icon: Icon(Icons.clear),
+                    onPressed: () => nameController.clear(),
+                  )
+                      : null,
+                ),
+              ),
+              SizedBox(height: 10),
+
+              // 회의 설명 입력
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  hintText: "회의 설명",
+                  hintStyle: TextStyle(color: Colors.grey),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                  suffixIcon: descriptionController.text.isNotEmpty
+                      ? IconButton(
+                    icon: Icon(Icons.clear),
+                    onPressed: () => descriptionController.clear(),
+                  )
+                      : null,
+                ),
+              ),
+              SizedBox(height: 10),
+
+              // 날짜 선택 필드
+              ListTile(
+                title: Text(
+                  selectedDate == null
+                      ? '날짜를 선택하세요'
+                      : DateFormat('yyyy-MM-dd').format(selectedDate!),
+                  style: TextStyle(color: Colors.black87),
+                ),
+                trailing: Icon(Icons.calendar_today),
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                    builder: (BuildContext ctx, Widget? child) {
+                      return Theme(
+                        data: ThemeData.light().copyWith(
+                          dialogBackgroundColor: Colors.white,
+                          colorScheme: ColorScheme.light(
+                            primary: Colors.blue,    // 헤더 배경
+                            onPrimary: Colors.white, // 헤더 텍스트
+                            surface: Colors.white,   // 달력 표면
+                            onSurface: Colors.black, // 날짜 글자
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+
+                  if (pickedDate != null && pickedDate != selectedDate) {
+                    selectedDate = pickedDate;
+                    (context as Element).markNeedsBuild();  // UI 업데이트 호출
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            // 취소 버튼
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(foregroundColor: Colors.black),
+              child: Text("취소"),
+            ),
+            // 확인 버튼: 날짜 선택 확인 후 onSubmit 호출
+            ElevatedButton(
+              onPressed: () {
+                if (selectedDate != null) {
+                  onSubmit(
+                    nameController.text,
+                    descriptionController.text,
+                    selectedDate!,
+                    directory,
+                  );
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("날짜를 선택해주세요")),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              ),
+              child: Text("확인"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+
+
 }

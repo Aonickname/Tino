@@ -277,7 +277,7 @@ def update_is_interested(data: dict = Body(...)):
     directory = data.get("directory")
     new_status = data.get("is_interested")
 
-    meetings_path = os.path.join(os.path.dirname(__file__), "meetings.json")
+    meetings_path = os.path.join(os.path.dirname(__file__), "../meetings.json")
     if not os.path.exists(meetings_path):
         raise HTTPException(status_code=404, detail="meetings.json 파일 없음")
 
@@ -298,6 +298,90 @@ def update_is_interested(data: dict = Body(...)):
         json.dump(meetings, f, ensure_ascii=False, indent=2)
 
     return {"message": "관심 상태가 업데이트되었습니다!"}
+
+# 회의 내용 수정
+@router.patch("/meetings/editContent")
+async def edit_meeting_content(payload: dict):
+    directory = payload.get("directory")
+    new_name = payload.get("name")
+    new_description = payload.get("description")
+    new_date = payload.get("date")  # Flutter에서 보낸 new_date를 받도록 추가
+
+    if not directory or not new_name or not new_description:
+        raise HTTPException(status_code=400, detail="필수 정보가 누락되었습니다.")
+
+    # 1. uploaded_files 폴더 내 폴더 이름 변경
+    old_folder_path = os.path.join(BASE_DIR, "uploaded_files", directory)
+    
+    # 새 폴더 이름 생성 (다른 POST 함수와 동일한 로직 적용)
+    # 기존 directory에서 timestamp와 uuid를 추출하여 재사용
+    parts = directory.split('_')
+    timestamp = parts[0]
+    unique_id = parts[-1]
+    safe_new_name = new_name.replace(" ", "_")[:15]
+    new_folder_name = f"{timestamp}_{safe_new_name}_{unique_id}"
+    
+    new_folder_path = os.path.join(BASE_DIR, "uploaded_files", new_folder_name)
+
+    try:
+        os.rename(old_folder_path, new_folder_path)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="폴더를 찾을 수 없습니다.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"폴더 이름 변경 실패: {e}")
+
+    # 2. meetings.json 파일 내용 변경
+    meetings_file_path = MEETINGS_JSON_PATH  # 전역 변수 MEETINGS_JSON_PATH 사용
+    
+    with open(meetings_file_path, 'r', encoding='utf-8') as f:
+        meetings_data = json.load(f)
+
+    # 기존 날짜에 해당하는 회의 데이터 찾기
+    original_date_str = ""
+    found_meeting = None
+    for date_str, meetings_list in meetings_data.items():
+        for meeting in meetings_list:
+            if meeting.get("directory") == directory:
+                original_date_str = date_str
+                found_meeting = meeting
+                break
+        if found_meeting:
+            break
+
+    if not found_meeting:
+        raise HTTPException(status_code=404, detail="해당 회의 데이터를 찾을 수 없습니다.")
+    
+    # 날짜가 변경되었는지 확인
+    new_date_str = new_date.split('T')[0]
+    is_date_changed = (original_date_str != new_date_str)
+
+    if is_date_changed:
+        # 기존 목록에서 삭제
+        meetings_data[original_date_str].remove(found_meeting)
+        if not meetings_data[original_date_str]:
+            del meetings_data[original_date_str]
+
+        # 새 날짜 목록에 추가
+        if new_date_str not in meetings_data:
+            meetings_data[new_date_str] = []
+        
+        found_meeting["name"] = new_name
+        found_meeting["description"] = new_description
+        found_meeting["directory"] = new_folder_name
+        
+        meetings_data[new_date_str].append(found_meeting)
+
+    else:
+        # 날짜가 변경되지 않았다면, 현재 위치에서 수정
+        found_meeting["name"] = new_name
+        found_meeting["description"] = new_description
+        found_meeting["directory"] = new_folder_name
+
+    with open(meetings_file_path, 'w', encoding='utf-8') as f:
+        json.dump(meetings_data, f, indent=4, ensure_ascii=False)
+
+    return {"message": "회의 정보가 성공적으로 수정되었습니다."}
+    
     
 # GET: summary.json 출력
 @router.get("/summary/{directory}") 

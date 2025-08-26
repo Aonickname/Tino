@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../widgets/folder_appbar.dart';
 import 'detail_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../widgets/dialog.dart';
 
 
 // 서버에서 회의 데이터를 삭제하는 함수
@@ -196,7 +197,7 @@ class _FolderScreenState extends State<FolderScreen> {
                           return true; // 전체 보기
                         }).toList();
 
-                        // 필터링된 회의 리스트를 위젯으로 변환
+                        // 필터링된 회의 리스트를 위젯으로 변환 == 티노 이미지 버튼
                         return filteredMeetings.map((meeting) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 20),
@@ -224,99 +225,145 @@ class _FolderScreenState extends State<FolderScreen> {
                                   ),
                                   SizedBox(width: 10),
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          meeting["name"] ?? "회의 이름 없음",
-                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              meeting["name"] ?? "회의 이름 없음",
+                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                            ),
+                                            Text(
+                                              meeting["description"] ?? "설명 없음",
+                                              style: TextStyle(fontSize: 14),
+                                            ),
+                                            Text(
+                                              formatDate(date),
+                                              style: TextStyle(fontSize: 14, color: Colors.grey),
+                                            ),
+                                          ],
                                         ),
-                                        Text(
-                                          meeting["description"] ?? "설명 없음",
-                                          style: TextStyle(fontSize: 14),
                                         ),
-                                        Text(
-                                          formatDate(date),
-                                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                                        Column(
+                                          children: [
+                                            // 관심 회의 등록 버튼
+                                            IconButton(
+                                              icon: Icon(
+                                                meeting["is_interested"] == "true" ? Icons.star : Icons.star_border,
+                                                color: Colors.amber,
+                                              ),
+                                              onPressed: () async {
+                                                final newStatus = meeting["is_interested"] != "true";
+                                                final response = await http.patch(
+                                                  Uri.parse('$baseUrl/api/meetings/interested'),
+                                                  headers: {"Content-Type": "application/json"},
+                                                  body: jsonEncode({
+                                                    "directory": meeting["directory"],
+                                                    "is_interested": newStatus,
+                                                  }),
+                                                );
+                                                if (response.statusCode == 200) {
+                                                  setState(() {});
+                                                } else {
+                                                  print("관심 상태 업데이트 실패");
+                                                }
+                                              },
+                                            ),
+                                            // 수정 버튼
+                                            IconButton(
+                                              icon: Icon(Icons.edit, color: Colors.grey[700]),
+                                              onPressed: () {
+                                                CustomDialogs.showInputDialogEdit(
+                                                  context,
+                                                  meeting["name"] ?? "",
+                                                  meeting["description"] ?? "",
+                                                  meeting["directory"] ?? "",
+                                                      (newName, newDescription, newDate, directory) async {
+                                                    // 서버로 PATCH 요청 보내기
+                                                    final url = Uri.parse('$baseUrl/api/meetings/editContent');
+                                                    final response = await http.patch(
+                                                      url,
+                                                      headers: {"Content-Type": "application/json"},
+                                                      body: jsonEncode({
+                                                        "directory": directory,
+                                                        "name": newName,
+                                                        "description": newDescription,
+                                                        "date": newDate.toIso8601String(), // ISO 8601 형식으로 변환
+                                                      }),
+                                                    );
+
+                                                    if (response.statusCode == 200) {
+                                                      setState(() {});
+                                                    } else {
+                                                      print('수정 실패: ${response.body}');
+                                                    }
+                                                  },
+                                                );
+                                              },
+                                            ),
+
+                                            //삭제 버튼
+                                            IconButton(
+                                              icon: Icon(Icons.close, color: Colors.red),
+                                              onPressed: () async {
+                                                final confirm = await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                                    title: Text('새로운 회의'),
+                                                    content: Text('이 회의 데이터를 삭제하면 복구할 수 없습니다.'),
+                                                    actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                                    actionsAlignment: MainAxisAlignment.spaceEvenly,
+                                                    actions: [
+                                                      ElevatedButton(
+                                                        onPressed: () => Navigator.of(context).pop(false),
+                                                        style: ElevatedButton.styleFrom(
+                                                          foregroundColor: Colors.black,
+                                                          backgroundColor: Colors.grey[200],
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(12),
+                                                          ),
+                                                          minimumSize: Size(100, 40),
+                                                        ),
+                                                        child: Text('취소'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () => Navigator.of(context).pop(true),
+                                                        style: ElevatedButton.styleFrom(
+                                                          foregroundColor: Colors.white,
+                                                          backgroundColor: Colors.black,
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(12),
+                                                          ),
+                                                          minimumSize: Size(100, 40),
+                                                        ),
+                                                        child: Text('삭제'),
+                                                      ),
+                                                    ],),
+                                                );
+                                                if (confirm == true) {
+                                                  await deleteMeetingFromServer(meeting["directory"] ?? "");
+                                                  setState(() {});
+                                                }
+                                              },
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: Icon(
-                                      meeting["is_interested"] == "true" ? Icons.star : Icons.star_border,
-                                      color: Colors.amber,
-                                    ),
-                                    onPressed: () async {
-
-                                      final newStatus = meeting["is_interested"] != "true";
-                                      final response = await http.patch(
-                                        Uri.parse('$baseUrl/meetings/interested'),
-                                        headers: {"Content-Type": "application/json"},
-                                        body: jsonEncode({
-                                          "directory": meeting["directory"],
-                                          "is_interested": newStatus,
-                                        }),
-                                      );
-                                      if (response.statusCode == 200) {
-                                        setState(() {}); // UI 새로고침
-                                      } else {
-                                        print("관심 상태 업데이트 실패");
-                                      }
-                                    },
-                                  ),
-                                  // 삭제 버튼
-                                  IconButton(
-                                    icon: Icon(Icons.close, color: Colors.red),
-                                    onPressed: () async {
-                                      final confirm = await showDialog<bool>(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                          title: Text('새로운 회의'),
-                                          content: Text('이 회의 데이터를 삭제하면 복구할 수 없습니다.'),
-                                          actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                          actionsAlignment: MainAxisAlignment.spaceEvenly,
-                                          actions: [
-                                            ElevatedButton(
-                                              onPressed: () => Navigator.of(context).pop(false),
-                                              style: ElevatedButton.styleFrom(
-                                                foregroundColor: Colors.black,
-                                                backgroundColor: Colors.grey[200],
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                minimumSize: Size(100, 40),
-                                              ),
-                                              child: Text('취소'),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () => Navigator.of(context).pop(true),
-                                              style: ElevatedButton.styleFrom(
-                                                foregroundColor: Colors.white,
-                                                backgroundColor: Colors.black,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                minimumSize: Size(100, 40),
-                                              ),
-                                              child: Text('삭제'),
-                                            ),
-                                          ],),
-                                      );
-                                      if (confirm == true) {
-                                        await deleteMeetingFromServer(meeting["directory"] ?? "");
-                                        setState(() {});
-                                      }
-                                    },
-                                  ),
                                 ],
                               ),
-
                             ),
                           );
 
-                        });
+                        }
+                        );
+
                       }).toList(),
                     ],
                   ),

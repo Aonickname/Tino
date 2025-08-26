@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: MainScreen(),
       theme: ThemeData(
-        dialogTheme: DialogThemeData( // 여기 수정
+        dialogTheme: DialogThemeData(
           backgroundColor: Colors.white,
         ),
       ),

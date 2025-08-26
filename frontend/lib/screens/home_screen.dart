@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
         throw Exception('서버에서 데이터를 가져오지 못했습니다.');
       }
     } catch (e) {
-      print('Error loading data: \$e');
+      print('Error loading data: $e');
       throw Exception('회의 데이터를 불러올 수 없습니다.');
     }
   }
@@ -132,10 +132,10 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         print("회의 저장 완료!");
       } else {
-        print("서버 오류: \${response.statusCode}");
+        print("서버 오류: ${response.statusCode}");
       }
     } catch (e) {
-      print("에러 발생: \$e");
+      print("에러 발생: $e");
     }
   }
 
@@ -177,256 +177,243 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         print("업로드 성공!");
       } else {
-        print("업로드 실패: \${response.statusCode}");
+        print("업로드 실패: ${response.statusCode}");
       }
     } catch (e) {
-      print("에러 발생: \$e");
+      print("에러 발생: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      scrollBehavior: MaterialScrollBehavior().copyWith(
-        dragDevices: {
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.touch,
-          PointerDeviceKind.stylus,
-          PointerDeviceKind.unknown
-        },
-      ),
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        bottomNavigationBarTheme: bottomNavBarTheme,  // 스타일 테마 적용
-      ),
-      home: Scaffold(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text('티노', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
-          leading: Image.asset('assets/images/small_tino.png'),
-          actions: [
-            IconButton(onPressed: () => print("search click"), icon: Icon(Icons.search)),
-            IconButton(onPressed: () => print("notification click"), icon: Icon(Icons.notifications_none)),
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // 커스텀 앱바 위젯
-              HomeAppBarWidget(),
-              SizedBox(height: 16.0),
+        title: Text('티노', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
+        leading: Image.asset('assets/images/small_tino.png'),
+        actions: [
+          IconButton(onPressed: () => print("search click"), icon: Icon(Icons.search)),
+          IconButton(onPressed: () => print("notification click"), icon: Icon(Icons.notifications_none)),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // 커스텀 앱바 위젯
+            // HomeAppBarWidget(),
+            SizedBox(height: 32.0),
 
-              // 배너 이미지 자동 슬라이드
-              Container(
-                height: 200,
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: PageView(
-                        controller: _pageController,
-                        children: [
-                          Image.asset("assets/images/banner1.jpg", fit: BoxFit.cover),
-                          Image.asset("assets/images/banner2.jpg", fit: BoxFit.cover),
-                          Image.asset("assets/images/banner3.jpg", fit: BoxFit.cover),
-                        ],
-                      ),
-                    ),
-                    // 배너 인디케이터
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: SmoothPageIndicator(
-                          controller: _pageController,
-                          count: 3,
-                          effect: ExpandingDotsEffect(
-                            activeDotColor: Colors.blue,
-                            dotHeight: 5,
-                            dotWidth: 5,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            // 배너 이미지 자동 슬라이드
+            Container(
 
-              SizedBox(height: 20.0),
-
-              // 새 회의 생성 버튼 및 녹음 파일 업로드 버튼 영역
-              Row(
+              height: 200,
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Stack(
                 children: [
-                  SizedBox(width: 20),
-
-                  // 새 회의 생성
-                  InkWell(
-                    onTap: () async {
-                      CustomDialogs.showInputDialogNewMeeting(
-                        context,
-                            (name, description, date) async {
-                          // 회의명, 설명, 날짜 입력 후 서버 저장
-                          await saveMeetingToServer(name, description, date.toIso8601String());
-
-                          // 저장 완료 후 녹음 화면으로 이동
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RecordScreen(
-                                meetingName: name,
-                                meetingDescription: description,
-                                meetingDate: date,
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: Column(
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: PageView(
+                      controller: _pageController,
                       children: [
-                        Image.asset("assets/images/new_meeting.jpg", width: 150, height: 150),
-                        Text('새로운 회의', style: commonTextStyle),
+                        Image.asset("assets/images/banner1.jpg", fit: BoxFit.cover),
+                        Image.asset("assets/images/banner2.jpg", fit: BoxFit.cover),
+                        Image.asset("assets/images/banner3.jpg", fit: BoxFit.cover),
                       ],
                     ),
                   ),
-
-                  SizedBox(width: 20),
-
-                  // 녹음 업로드
-                  InkWell(
-                    onTap: () {
-                      CustomDialogs.showInputDialogUpload(
-                        context,
-                            (name, description, file, date, summaryMode, customPrompt) async {
-                          if (file != null) {
-                            await uploadMeetingWithFile(name, description, file, date, summaryMode, customPrompt);
-                            setState(() {}); // 업로드 후 화면 갱신
-                          } else {
-                            print("파일이 선택되지 않았습니다.");
-                          }
-                        },
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        Image.asset("assets/images/mp3_upload.jpg", width: 150, height: 150),
-                        Text('녹음 업로드', style: commonTextStyle),
-                      ],
+                  // 배너 인디케이터
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: SmoothPageIndicator(
+                        controller: _pageController,
+                        count: 3,
+                        effect: ExpandingDotsEffect(
+                          activeDotColor: Colors.blue,
+                          dotHeight: 5,
+                          dotWidth: 5,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
+            ),
 
-              SizedBox(height: 20),
+            SizedBox(height: 20.0),
 
-              // 최근 회의 내역 리스트
-              Container(
-                child: Column(
-                  children: [
-                    // 헤더: 제목 및 정렬 버튼
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            SizedBox(width: 8.0),
-                            Text('최근 회의 내역', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                            Icon(Icons.chevron_right),
-                          ],
-                        ),
-                        TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _isLatestFirst = !_isLatestFirst; // 정렬 순서 토글
-                            });
-                          },
-                          icon: Icon(
-                            _isLatestFirst ? Icons.arrow_downward : Icons.arrow_upward,
-                            size: 18,
-                          ),
-                          label: Text(_isLatestFirst ? "최신순" : "오래된순"),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
+            // 새 회의 생성 버튼 및 녹음 파일 업로드 버튼 영역
+            Row(
+              children: [
+                SizedBox(width: 20),
 
-                    // 서버에서 로드된 회의 데이터 표시
-                    FutureBuilder<Map<String, List<Map<String, String>>>>(
-                      future: loadMeetingsFromJson(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator()); // 로딩 중
-                        }
-                        if (snapshot.hasError) {
-                          return Center(child: Text("에러: \${snapshot.error}")); // 에러 표시
-                        }
-                        if (!snapshot.hasData) {
-                          return Center(child: Text("회의 데이터를 불러올 수 없습니다."));
-                        }
+                // 새 회의 생성
+                InkWell(
+                  onTap: () async {
+                    CustomDialogs.showInputDialogNewMeeting(
+                      context,
+                          (name, description, date) async {
+                        // 회의명, 설명, 날짜 입력 후 서버 저장
+                        await saveMeetingToServer(name, description, date.toIso8601String());
 
-                        // 날짜 키를 정렬하여 순서 지정
-                        final data = snapshot.data!;
-                        final sortedDates = data.keys.toList()
-                          ..sort((a, b) => _isLatestFirst ? b.compareTo(a) : a.compareTo(b));
-
-                        // 가로 스크롤 가능한 회의 카드 리스트
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              SizedBox(width: 20),
-                              ...sortedDates.expand((date) {
-                                return data[date]! .map((meeting) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 10),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        // 카드 클릭 시 상세화면으로 이동
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => DetailScreen(
-                                              name: meeting["name"] ?? "",
-                                              description: meeting["description"] ?? "",
-                                              date: formatDate(date),
-                                              directory: meeting["directory"] ?? "",
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          // 회의 대표 이미지
-                                          Image.asset(meeting["image"]!, width: 200, height: 200),
-
-                                          // 회의 제목, 설명, 날짜
-                                          Text(meeting["name"] ?? "회의 이름 없음",
-                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                          Text(meeting["description"] ?? "설명 없음", style: commonTextStyle),
-                                          Text(formatDate(date), style: commonTextStyle),
-                                        ],
-                                      ),
-
-                                    ),
-                                  );
-                                }).toList();
-                              }).toList(),
-                              SizedBox(width: 20),
-                            ],
+                        // 저장 완료 후 녹음 화면으로 이동
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RecordScreen(
+                              meetingName: name,
+                              meetingDescription: description,
+                              meetingDate: date,
+                            ),
                           ),
                         );
                       },
-                    ),
-                  ],
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      Image.asset("assets/images/new_meeting.jpg", width: 150, height: 150),
+                      Text('새로운 회의', style: commonTextStyle),
+                    ],
+                  ),
                 ),
+
+                SizedBox(width: 20),
+
+                // 녹음 업로드
+                InkWell(
+                  onTap: () {
+                    CustomDialogs.showInputDialogUpload(
+                      context,
+                          (name, description, file, date, summaryMode, customPrompt) async {
+                        if (file != null) {
+                          await uploadMeetingWithFile(name, description, file, date, summaryMode, customPrompt);
+                          setState(() {}); // 업로드 후 화면 갱신
+                        } else {
+                          print("파일이 선택되지 않았습니다.");
+                        }
+                      },
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      Image.asset("assets/images/mp3_upload.jpg", width: 150, height: 150),
+                      Text('녹음 업로드', style: commonTextStyle),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 20),
+
+            // 최근 회의 내역 리스트
+            Container(
+              child: Column(
+                children: [
+                  // 헤더: 제목 및 정렬 버튼
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(width: 8.0),
+                          Text('최근 회의 내역', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          Icon(Icons.chevron_right),
+                        ],
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isLatestFirst = !_isLatestFirst; // 정렬 순서 토글
+                          });
+                        },
+                        icon: Icon(
+                          _isLatestFirst ? Icons.arrow_downward : Icons.arrow_upward,
+                          size: 18,
+                        ),
+                        label: Text(_isLatestFirst ? "최신순" : "오래된순"),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // 서버에서 로드된 회의 데이터 표시
+                  FutureBuilder<Map<String, List<Map<String, String>>>>(
+                    future: loadMeetingsFromJson(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator()); // 로딩 중
+                      }
+                      if (snapshot.hasError) {
+                        return Center(child: Text("에러: ${snapshot.error}")); // 에러 표시
+                      }
+                      if (!snapshot.hasData) {
+                        return Center(child: Text("회의 데이터를 불러올 수 없습니다."));
+                      }
+
+                      // 날짜 키를 정렬하여 순서 지정
+                      final data = snapshot.data!;
+                      final sortedDates = data.keys.toList()
+                        ..sort((a, b) => _isLatestFirst ? b.compareTo(a) : a.compareTo(b));
+
+                      // 가로 스크롤 가능한 회의 카드 리스트
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            SizedBox(width: 20),
+                            ...sortedDates.expand((date) {
+                              return data[date]! .map((meeting) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // 카드 클릭 시 상세화면으로 이동
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DetailScreen(
+                                            name: meeting["name"] ?? "",
+                                            description: meeting["description"] ?? "",
+                                            date: formatDate(date),
+                                            directory: meeting["directory"] ?? "",
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // 회의 대표 이미지
+                                        Image.asset(meeting["image"]!, width: 200, height: 200),
+
+                                        // 회의 제목, 설명, 날짜
+                                        Text(meeting["name"] ?? "회의 이름 없음",
+                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                        Text(meeting["description"] ?? "설명 없음", style: commonTextStyle),
+                                        Text(formatDate(date), style: commonTextStyle),
+                                      ],
+                                    ),
+
+                                  ),
+                                );
+                              }).toList();
+                            }).toList(),
+                            SizedBox(width: 20),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
