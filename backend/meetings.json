@@ -25,5 +25,14 @@
       "is_ended": true,
       "directory": "20250624_저녁_메뉴_선정_4746c8"
     }
+  ],
+  "2025-08-27T00:00:00.000": [
+    {
+      "name": "ㄹ",
+      "description": "ㄹ",
+      "is_interested": false,
+      "is_ended": true,
+      "directory": "20250827_214543_ㄹ_4d7436"
+    }
   ]
 }

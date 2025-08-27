@@ -4,10 +4,8 @@ import requests
 import openai
 import warnings
 import asyncio
-import websocket
 from fpdf import FPDF
 from dotenv import load_dotenv
-
 
 # .env 파일 로드를 위해 BASE_DIR를 정의합니다.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -131,87 +129,97 @@ def transcribe_and_save_to_json(audio_path: str, output_dir: str, summary_mode: 
     try:
         progress_map[directory_key] = 10
         print("🗣️  Clova STT 요청 중...")
-        print("✅ API 호출 대신 테스트 모드로 진행합니다.")
-        # 가상의 요약 텍스트를 만듭니다.
-        test_summary_text = """
-        1. 회의 제목: 웹 소켓 알림 테스트 회의
-        2. 회의 일시: 2025년 8월 26일
-        3. 참석자: 홍길동, 김철수
-        4. 회의 목적: API 호출 없이 푸시 알림 테스트
-        5. 주요 발언 요약:
-           - 홍길동: API 비용을 절감하기 위해 알림 테스트만 하고 싶다.
-           - 김철수: 더미 데이터를 사용하여 푸시 알림 기능을 점검하자고 제안했다.
-        6. 결정 사항:
-           - API 호출 부분을 주석 처리하고 가짜 데이터를 사용하기로 결정함.
-           - 테스트용 요약 텍스트를 만들어 PDF를 생성하고 알림을 보낼 예정.
-        7. 다음 일정/후속 조치:
-           - 코드 수정 후 푸시 알림 테스트 실행
-           - 테스트 완료 후 원래 코드로 복구
-        """
         
-        # 가상의 결과 파일들을 저장할 경로를 설정합니다.
-        json_path = os.path.join(output_dir, "result.json")
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump({"segments": [], "text": "테스트용 음성 인식 텍스트"}, f, ensure_ascii=False, indent=2)
-        progress_map[directory_key] = 70
-
-        summary_path = os.path.join(output_dir, "summary.json")
-        with open(summary_path, "w", encoding="utf-8") as f:
-            json.dump({"summary": test_summary_text}, f, ensure_ascii=False, indent=2)
-        progress_map[directory_key] = 90
         
-        # PDF 생성 함수를 호출합니다.
-        pdf_path = os.path.join(output_dir, "summary.pdf")
-        save_summary_as_pdf(test_summary_text, pdf_path)
-        progress_map[directory_key] = 100
+        # #===========================================================
+        # print("✅ API 호출 대신 테스트 모드로 진행합니다.")
+        # # 가상의 요약 텍스트를 만듭니다.
+        # test_summary_text = """
+        # 1. 회의 제목: 웹 소켓 알림 테스트 회의
+        # 2. 회의 일시: 2025년 8월 26일
+        # 3. 참석자: 홍길동, 김철수
+        # 4. 회의 목적: API 호출 없이 푸시 알림 테스트
+        # 5. 주요 발언 요약:
+        #    - 홍길동: API 비용을 절감하기 위해 알림 테스트만 하고 싶다.
+        #    - 김철수: 더미 데이터를 사용하여 푸시 알림 기능을 점검하자고 제안했다.
+        # 6. 결정 사항:
+        #    - API 호출 부분을 주석 처리하고 가짜 데이터를 사용하기로 결정함.
+        #    - 테스트용 요약 텍스트를 만들어 PDF를 생성하고 알림을 보낼 예정.
+        # 7. 다음 일정/후속 조치:
+        #    - 코드 수정 후 푸시 알림 테스트 실행
+        #    - 테스트 완료 후 원래 코드로 복구
+        # """
         
-        # websocket test 중
-        # res = client.req_upload(
-        #     file=audio_path,
-        #     completion='sync',
-        #     wordAlignment=True,
-        #     fullText=True
-        # )
-        # res.raise_for_status()
-        # result = res.json()
-        # progress_map[directory_key] = 30
-        
-        # raw_segments = result.get('segments', [])
-        # segments = [{'start': s.get('start'), 'end': s.get('end'), 'speaker': s.get('speaker', {}).get('label', 'unknown'), 'text': s.get('text', '').strip()} for s in raw_segments]
-        # progress_map[directory_key] = 40
-
-        # combined_text = " ".join([s['text'] for s in segments])
-        # payload = {"segments": segments, "text": combined_text}
+        # # 가상의 결과 파일들을 저장할 경로를 설정합니다.
         # json_path = os.path.join(output_dir, "result.json")
         # with open(json_path, "w", encoding="utf-8") as f:
-        #     json.dump(payload, f, ensure_ascii=False, indent=2)
+        #     json.dump({"segments": [], "text": "테스트용 음성 인식 텍스트"}, f, ensure_ascii=False, indent=2)
         # progress_map[directory_key] = 70
 
-        # # summarize_text 함수를 직접 호출합니다.
-        # summary = summarize_text(combined_text, mode=summary_mode, custom_prompt=custom_prompt)
         # summary_path = os.path.join(output_dir, "summary.json")
         # with open(summary_path, "w", encoding="utf-8") as f:
-        #     json.dump({"summary": summary}, f, ensure_ascii=False, indent=2)
+        #     json.dump({"summary": test_summary_text}, f, ensure_ascii=False, indent=2)
         # progress_map[directory_key] = 90
         
         # # PDF 생성 함수를 호출합니다.
         # pdf_path = os.path.join(output_dir, "summary.pdf")
-        # save_summary_as_pdf(summary, pdf_path)
+        # save_summary_as_pdf(test_summary_text, pdf_path)
         # progress_map[directory_key] = 100
+        # #===========================================================
+        
+        res = client.req_upload(
+            file=audio_path,
+            completion='sync',
+            wordAlignment=True,
+            fullText=True
+        )
+        res.raise_for_status()
+        result = res.json()
+        progress_map[directory_key] = 30
+        
+        raw_segments = result.get('segments', [])
+        segments = [{'start': s.get('start'), 'end': s.get('end'), 'speaker': s.get('speaker', {}).get('label', 'unknown'), 'text': s.get('text', '').strip()} for s in raw_segments]
+        progress_map[directory_key] = 40
+
+        combined_text = " ".join([s['text'] for s in segments])
+        payload = {"segments": segments, "text": combined_text}
+        json_path = os.path.join(output_dir, "result.json")
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+        progress_map[directory_key] = 70
+
+        # summarize_text 함수를 직접 호출합니다.
+        summary = summarize_text(combined_text, mode=summary_mode, custom_prompt=custom_prompt)
+        summary_path = os.path.join(output_dir, "summary.json")
+        with open(summary_path, "w", encoding="utf-8") as f:
+            json.dump({"summary": summary}, f, ensure_ascii=False, indent=2)
+        progress_map[directory_key] = 90
+        
+        # PDF 생성 함수를 호출합니다.
+        pdf_path = os.path.join(output_dir, "summary.pdf")
+        save_summary_as_pdf(summary, pdf_path)
+        progress_map[directory_key] = 100
 
         print(f"✅ 변환 완료! '{json_path}'에 저장됨")
-        try:
-            ws_url = os.getenv("NOTIFICATION_WEBSOCKET_URL")
-            ws = websocket.WebSocket()
-            ws.connect(ws_url)
-            message = json.dumps({"type": "pdf_complete"})
-            ws.send(message)
-            ws.close()
-            print("🎉 PDF 완료 알림을 웹소켓으로 보냈습니다!")
-        except Exception as e:
-            print(f"❌ 웹소켓 메시지 전송 실패: {e}")
+        send_pdf_complete_notification_via_http()
             
     except Exception as e:
         print(f"❌ 변환 중 에러 발생: {e}")
         progress_map[directory_key] = -1
 
+
+# 웹 소켓 통해 요약 완료 알림 보내기
+def send_pdf_complete_notification_via_http():
+    try:
+        # .env 파일에서 서버 주소를 가져옵니다.
+        base_url = os.getenv("API_BASE_URL")
+        if not base_url:
+            print("❌ 오류: 'API_BASE_URL'이 .env에 설정되지 않았습니다.")
+            return
+
+        # FastAPI 엔드포인트에 POST 요청을 보냅니다.
+        requests.post(f"{base_url}/api/notifications/pdf-complete")
+        print("🎉 PDF 완료 알림 요청을 서버에 보냈습니다!")
+
+    except Exception as e:
+        print(f"❌ 알림 요청 실패: {e}")

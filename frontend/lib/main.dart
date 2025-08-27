@@ -1,3 +1,4 @@
+// main.dart 파일
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'screens/home_screen.dart';
 import 'screens/folder_screen.dart';
-import 'screens/schedule_screen.dart';
 import 'screens/schedule_screen.dart';
 import 'screens/settings_screen.dart';
 import 'widgets/bottom_navigation.dart';
@@ -95,45 +95,13 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-
-
     super.initState();
-
-    final notificationUrl = dotenv.env['NOTIFICATION_WEBSOCKET_URL'];
-
-    _requestIOSPermissions();
-
-    // WebSocket 연결
-    _wsChannel = IOWebSocketChannel.connect(
-      notificationUrl!,
-    );
-    _wsChannel.stream.listen((message) {
-      final data = jsonDecode(message);
-      if (data['type'] == 'pdf_complete') {
-        flutterLocalNotificationsPlugin.show(
-          1,
-          '회의 분석 완료 🎉',
-          '결과를 확인하세요.',
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              'pdf_channel', 'PDF 알림',
-              channelDescription: '요약 PDF 생성 완료 알림',
-              importance: Importance.high,
-              priority: Priority.high,
-            ),
-            iOS: const DarwinNotificationDetails(
-              presentAlert: true,
-              presentBadge: true,
-              presentSound: true,
-            ),
-          ),
-        );
-      }
-    });
+    _setupNotifications(); // 알림 관련 로직을 하나의 함수로 호출
   }
 
-  // IOS 요약 완료 알림
-  void _requestIOSPermissions() {
+  // 알림 및 웹소켓 관련 코드
+  void _setupNotifications() {
+    // iOS 알림 권한 요청
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>()
@@ -142,10 +110,65 @@ class _MainScreenState extends State<MainScreen> {
       badge: true,
       sound: true,
     );
+
+    final notificationUrl = dotenv.env['NOTIFICATION_WEBSOCKET_URL'];
+
+    if (notificationUrl == null || notificationUrl.isEmpty) {
+      print('오류: NOTIFICATION_WEBSOCKET_URL이 설정되지 않았습니다.');
+      return;
+    }
+
+    try {
+      // WebSocket 연결
+      _wsChannel = IOWebSocketChannel.connect(
+        Uri.parse(notificationUrl),
+        customClient: HttpClient()
+          ..badCertificateCallback = (X509Certificate cert, String host, int port) => true,
+      );
+
+      print('WebSocket 연결 시도: $notificationUrl');
+
+      // 웹소켓 메시지 수신 리스너
+      _wsChannel.stream.listen(
+            (message) {
+          print('웹소켓 알림 수신: $message');
+          final data = jsonDecode(message);
+          if (data['type'] == 'pdf_complete') {
+            flutterLocalNotificationsPlugin.show(
+              1,
+              '회의 분석 완료 🎉',
+              '결과를 확인하세요.',
+              NotificationDetails(
+                android: AndroidNotificationDetails(
+                  'pdf_channel', 'PDF 알림',
+                  channelDescription: '요약 PDF 생성 완료 알림',
+                  importance: Importance.high,
+                  priority: Priority.high,
+                ),
+                iOS: const DarwinNotificationDetails(
+                  presentAlert: true,
+                  presentBadge: true,
+                  presentSound: true,
+                ),
+              ),
+            );
+          }
+        },
+        onDone: () {
+          print('웹소켓 연결 종료');
+        },
+        onError: (error) {
+          print('웹소켓 오류 발생: $error');
+        },
+      );
+    } catch (e) {
+      print('웹소켓 연결 실패: $e');
+    }
   }
 
   @override
   void dispose() {
+    // 앱 종료 시 웹소켓 연결을 닫습니다.
     _wsChannel.sink.close();
     super.dispose();
   }

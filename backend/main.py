@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, Request, Body, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, UploadFile, Form, Request, Body, WebSocket, WebSocketDisconnect, Header
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -21,6 +21,7 @@ import azure.cognitiveservices.speech as speechsdk
 from typing import List
 
 from api import meetings
+from api.websockets import manager as notification_manager
 
 import os
 from dotenv import load_dotenv
@@ -53,94 +54,76 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#업로드 완료되면 앱 푸시
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def broadcast(self, message: str):
-        for conn in list(self.active_connections):
-            try:
-                await conn.send_text(message)
-            except:
-                self.disconnect(conn)
-
-manager = ConnectionManager()
-
 @app.websocket("/ws/notifications")
 async def notifications_ws(websocket: WebSocket):
-    await manager.connect(websocket)
+    await notification_manager.connect(websocket)
     try:
         while True:
-            # 클라이언트 ping 용(필요 없으면 지워도 OK)
             await websocket.receive_text()
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        notification_manager.disconnect(websocket)
 
+@app.post("/api/notifications/pdf-complete")
+async def send_pdf_complete_notification():
+    message = json.dumps({"type": "pdf_complete"})
+    await notification_manager.broadcast(message)
+    return {"message": "Notification sent"}
 
+# progress_map = {}
+# # fpdf/ttfonts.py 모듈에서 "cmap value too big/small" 메시지를 무시
+# warnings.filterwarnings(
+#     "ignore",
+#     message=r"cmap value too big/small:.*",
+#     category=UserWarning,
+#     module=r"fpdf\.ttfonts"
+# )
 
-progress_map = {}
-# fpdf/ttfonts.py 모듈에서 "cmap value too big/small" 메시지를 무시
-warnings.filterwarnings(
-    "ignore",
-    message=r"cmap value too big/small:.*",
-    category=UserWarning,
-    module=r"fpdf\.ttfonts"
-)
+# @app.websocket("/ws/stt")
+# async def websocket_endpoint(websocket: WebSocket):
+#     await websocket.accept()
+#     print("🎙 WebSocket 연결됨")
 
-@app.websocket("/ws/stt")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    print("🎙 WebSocket 연결됨")
+#     # 오디오 데이터를 받기 위한 스트림
+#     stream = speechsdk.audio.PushAudioInputStream()
+#     audio_config = speechsdk.audio.AudioConfig(stream=stream)
+#     speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=REGION)
+#     speech_config.speech_recognition_language = "ko-KR"
 
-    # 오디오 데이터를 받기 위한 스트림
-    stream = speechsdk.audio.PushAudioInputStream()
-    audio_config = speechsdk.audio.AudioConfig(stream=stream)
-    speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=REGION)
-    speech_config.speech_recognition_language = "ko-KR"
+#     recognizer = speechsdk.SpeechRecognizer(
+#         speech_config=speech_config, audio_config=audio_config
+#     )
 
-    recognizer = speechsdk.SpeechRecognizer(
-        speech_config=speech_config, audio_config=audio_config
-    )
+#     loop = asyncio.get_event_loop()
 
-    loop = asyncio.get_event_loop()
+#     done = asyncio.Event()
 
-    done = asyncio.Event()
+#     def handle_result(evt):
+#         if evt.result.reason == ResultReason.RecognizedSpeech:
+#             asyncio.run_coroutine_threadsafe(
+#                 websocket.send_text(evt.result.text), loop
+#             )
 
-    def handle_result(evt):
-        if evt.result.reason == ResultReason.RecognizedSpeech:
-            asyncio.run_coroutine_threadsafe(
-                websocket.send_text(evt.result.text), loop
-            )
+#     recognizer.recognized.connect(handle_result)
 
-    recognizer.recognized.connect(handle_result)
+#     def stop_cb(evt):
+#         print("🛑 인식 종료:", evt)
+#         done.set()
 
-    def stop_cb(evt):
-        print("🛑 인식 종료:", evt)
-        done.set()
+#     recognizer.session_stopped.connect(stop_cb)
+#     recognizer.canceled.connect(stop_cb)
 
-    recognizer.session_stopped.connect(stop_cb)
-    recognizer.canceled.connect(stop_cb)
+#     recognizer.start_continuous_recognition()
 
-    recognizer.start_continuous_recognition()
-
-    try:
-        while True:
-            data = await websocket.receive_bytes()
-            stream.write(data)
-    except Exception as e:
-        print("❌ 에러:", e)
-    finally:
-        recognizer.stop_continuous_recognition()
-        stream.close()
-        await websocket.close()
+#     try:
+#         while True:
+#             data = await websocket.receive_bytes()
+#             stream.write(data)
+#     except Exception as e:
+#         print("❌ 에러:", e)
+#     finally:
+#         recognizer.stop_continuous_recognition()
+#         stream.close()
+#         await websocket.close()
 
 
 # ClovaSpeechClient 정의
