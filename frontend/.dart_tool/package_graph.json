@@ -12,6 +12,7 @@
         "fl_chart",
         "flutter",
         "flutter_dotenv",
+        "flutter_launcher_icons",
         "flutter_local_notifications",
         "flutter_sound",
         "google_speech",
