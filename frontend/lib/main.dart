@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:tino/screens/login_screen.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'screens/home_screen.dart';
@@ -11,6 +12,7 @@ import 'screens/schedule_screen.dart';
 import 'screens/settings_screen.dart';
 import 'widgets/bottom_navigation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tino/screens/login_screen.dart';
 
 
 // ngrok 무료 플랜 SSL 인증서 무시 설정
@@ -66,7 +68,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Tino',
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+      // home: MainScreen(),
+      home: LoginScreen(),
       theme: ThemeData(
         dialogTheme: DialogThemeData(
           backgroundColor: Colors.white,
