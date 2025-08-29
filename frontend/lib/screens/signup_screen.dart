@@ -1,9 +1,9 @@
-// signup_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:tino/screens/login_screen.dart';
 import 'package:http/http.dart' as http; // http 라이브러리를 가져옵니다.
 import 'dart:convert'; // JSON 데이터를 다루기 위한 라이브러리
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 // StatefulWidget으로 변경
 class SignupScreen extends StatefulWidget {
@@ -40,8 +40,10 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    final baseUrl = dotenv.env['API_BASE_URL'];
+    final url = Uri.parse('$baseUrl/api/signup');
+
     // 2. 서버에 보낼 JSON 데이터 준비
-    final url = Uri.parse('http://0.0.0.0:8000/api/signup');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

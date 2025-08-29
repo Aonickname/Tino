@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:tino/providers/user_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 
 class LoginScreen extends StatefulWidget {
@@ -33,7 +35,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    final url = Uri.parse('http://0.0.0.0:8000/api/login');
+    final baseUrl = dotenv.env['API_BASE_URL'];
+    final url = Uri.parse('$baseUrl/api/login');
+
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
