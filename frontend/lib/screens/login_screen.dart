@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    final baseUrl = dotenv.env['API_BASE_URL'];
+    final baseUrl = dotenv.env['DB_BASE_URL'];
     final url = Uri.parse('$baseUrl/api/login');
 
     final response = await http.post(

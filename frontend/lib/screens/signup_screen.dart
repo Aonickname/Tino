@@ -40,7 +40,7 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final baseUrl = dotenv.env['API_BASE_URL'];
+    final baseUrl = dotenv.env['DB_BASE_URL'];
     final url = Uri.parse('$baseUrl/api/signup');
 
     // 2. 서버에 보낼 JSON 데이터 준비
