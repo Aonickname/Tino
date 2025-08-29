@@ -8,7 +8,6 @@ import 'package:tino/providers/user_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -46,19 +45,6 @@ class _LoginScreenState extends State<LoginScreen> {
         'password': _passwordController.text,
       }),
     );
-
-  //   if (response.statusCode == 200) {
-  //     ScaffoldMessenger.of(context).showSnackBar(_buildSnackBar('로그인 성공!'));
-  //     Navigator.pushReplacement(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => MainScreen()),
-  //     );
-  //   } else {
-  //     final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-  //     final errorMessage = errorData['detail'];
-  //     ScaffoldMessenger.of(context).showSnackBar(_buildSnackBar('로그인 실패: $errorMessage', isSuccess: false));
-  //   }
-  // }
 
     if (response.statusCode == 200) {
       final userData = jsonDecode(utf8.decode(response.bodyBytes));

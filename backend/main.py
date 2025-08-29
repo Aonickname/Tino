@@ -1,3 +1,5 @@
+# main.py
+
 import os
 import sys
 import warnings
@@ -8,7 +10,7 @@ import asyncio
 import re
 from urllib.parse import unquote
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 # FastAPI 관련 모듈
 from fastapi import (
@@ -34,7 +36,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
 # SQLAlchemy (데이터베이스 ORM)
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKeyConstraint
 from sqlalchemy.orm import Session, sessionmaker, declarative_base
 
 # 비밀번호 암호화
@@ -66,14 +68,30 @@ CLOVA_SECRET = os.getenv("CLOVA_SECRET")
 CLOVA_INVOKE_URL = os.getenv("CLOVA_INVOKE_URL")
 DB_URL = os.getenv("DB_URL")
 
+# --- FastAPI 앱 및 라우터 설정 ---
+app = FastAPI()
+
+router = APIRouter(prefix="/api", tags=["Users API"])
+
+app.include_router(meetings.router, prefix="/api", tags=["Meetings API"])
+
+
+# 모든 출처(CORS)에서 요청을 허용하도록 설정합니다.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # --- 데이터베이스 설정 ---
 engine = create_engine(DB_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base() # 데이터베이스 테이블의 '설계도' 역할을 합니다.
 
-# 데이터베이스 세션을 가져오는 함수입니다.
-# FastAPI가 요청을 처리할 때마다 데이터베이스에 연결하고, 끝나면 연결을 자동으로 끊어줍니다.
 def get_db():
+    """FastAPI가 요청을 처리할 때마다 데이터베이스에 연결하고, 끝나면 연결을 자동으로 끊어줍니다."""
     db = SessionLocal()
     try:
         yield db
@@ -84,25 +102,39 @@ def get_db():
 # 사용자의 비밀번호를 안전하게 저장하고 검증하기 위한 설정입니다.
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# 비밀번호를 암호화하는 함수입니다.
 def get_password_hash(password: str) -> str:
+    """비밀번호를 암호화하는 함수입니다."""
     return pwd_context.hash(password)
 
-# 사용자가 입력한 비밀번호와 저장된 암호화된 비밀번호가 일치하는지 확인하는 함수입니다.
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """사용자가 입력한 비밀번호와 저장된 암호화된 비밀번호가 일치하는지 확인하는 함수입니다."""
     return pwd_context.verify(plain_password, hashed_password)
 
 # --- 데이터베이스 모델 (테이블 설계도) ---
-# 'users'라는 이름의 데이터베이스 테이블을 어떻게 만들지 정의합니다.
 class User(Base):
+    """'users'라는 이름의 데이터베이스 테이블을 어떻게 만들지 정의합니다."""
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True)
     email = Column(String(255), unique=True, index=True)
     hashed_password = Column(String(255))
 
+class Group(Base):
+    __tablename__ = "groups"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), unique=True, index=True)
+    description = Column(Text)
+
+class UserGroup(Base):
+    __tablename__ = "user_groups"
+    user_id = Column(Integer, primary_key=True)
+    group_id = Column(Integer, primary_key=True)
+    __table_args__ = (
+        ForeignKeyConstraint(['user_id'], ['users.id']),
+        ForeignKeyConstraint(['group_id'], ['groups.id']),
+    )
+
 # --- Pydantic 스키마 (데이터 유효성 검사) ---
-# API로 들어오는 요청 데이터가 어떤 모양인지 정의합니다.
 class UserCreate(BaseModel):
     username: str
     password: str
@@ -117,13 +149,20 @@ class UserInDB(BaseModel):
     username: str
     email: EmailStr
     hashed_password: str
-    
-    # ORM 모드 설정: 데이터베이스 객체를 Pydantic 모델로 변환할 수 있게 해줍니다.
     class Config:
         from_attributes = True
 
+class GroupCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    username: str
+
+class UserGroupCreate(BaseModel):
+    username: str
+    group_name: str
+
 # --- CRUD (Create, Read, Update, Delete) 로직 ---
-# 데이터베이스와 상호작용하는 함수들을 모아놓은 곳입니다.
+# 데이터베이스와 상호작용하는 모든 함수를 이 부분에 모아둡니다.
 def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
@@ -139,33 +178,46 @@ def create_user(db: Session, user: UserCreate):
     db.refresh(db_user)
     return db_user
 
-# --- FastAPI 앱 및 라우터 설정 ---
-# 웹 서버의 '뼈대'를 만들고, API 주소(라우터)들을 연결합니다.
-app = FastAPI()
+def get_group_by_name(db: Session, name: str):
+    return db.query(Group).filter(Group.name == name).first()
 
-# 모든 출처(CORS)에서 요청을 허용하도록 설정합니다.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+def create_group(db: Session, group_data: GroupCreate):
+    db_group = Group(name=group_data.name, description=group_data.description)
+    db.add(db_group)
+    db.commit()
+    db.refresh(db_group)
+    return db_group
 
-# API 주소들을 모아놓는 '라우터'를 만듭니다.
-router = APIRouter(prefix="/api", tags=["Users API"])
-app.include_router(meetings.router, prefix="/api", tags=["Meetings API"])
+def get_user_groups_by_username(db: Session, username: str):
+    """사용자 이름으로 해당 사용자가 속한 모든 그룹을 조회합니다."""
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return []
+    
+    user_groups = (
+        db.query(Group)
+        .join(UserGroup, UserGroup.group_id == Group.id)
+        .filter(UserGroup.user_id == user.id)
+        .all()
+    )
+    return user_groups
 
+def delete_group_by_id(db: Session, group_id: int):
+    """그룹 ID로 그룹을 삭제합니다. (user_groups 테이블의 연결도 같이 삭제됩니다 - ON DELETE CASCADE)"""
+    db_group = db.query(Group).filter(Group.id == group_id).first()
+    if db_group:
+        db.delete(db_group)
+        db.commit()
+        return True
+    return False
 
 # --- API 엔드포인트 ---
 # 실제 사용자가 요청을 보낼 주소와 그 요청을 처리할 함수를 연결합니다.
+# 모든 @router로 시작하는 함수들을 이 부분에 모아둡니다.
 
 @router.post("/signup", response_model=UserInDB)
 async def create_user_route(user: UserCreate, db: Session = Depends(get_db)):
-    """
-    회원가입을 처리하는 API입니다.
-    사용자 이름이 이미 존재하면 에러를 반환합니다.
-    """
+    """회원가입을 처리하는 API입니다. 사용자 이름이 이미 존재하면 에러를 반환합니다."""
     db_user = get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(
@@ -174,31 +226,9 @@ async def create_user_route(user: UserCreate, db: Session = Depends(get_db)):
         )
     return create_user(db=db, user=user)
 
-# @router.post("/login")
-# async def login_route(user_data: UserLogin, db: Session = Depends(get_db)):
-#     """
-#     로그인을 처리하는 API입니다.
-#     아이디와 비밀번호가 맞지 않으면 에러를 반환합니다.
-#     """
-#     user = get_user_by_username(db, username=user_data.username)
-#     if not user:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="아이디 또는 비밀번호가 틀립니다."
-#         )
-#     if not verify_password(user_data.password, user.hashed_password):
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="아이디 또는 비밀번호가 틀립니다."
-#         )
-#     return {"message": "로그인 성공!"}
-
 @router.post("/login")
 async def login_route(user_data: UserLogin, db: Session = Depends(get_db)):
-    """
-    로그인을 처리하는 API입니다.
-    아이디와 비밀번호가 맞지 않으면 에러를 반환합니다.
-    """
+    """로그인을 처리하는 API입니다. 아이디와 비밀번호가 맞지 않으면 에러를 반환합니다."""
     user = get_user_by_username(db, username=user_data.username)
     if not user:
         raise HTTPException(
@@ -210,30 +240,60 @@ async def login_route(user_data: UserLogin, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="아이디 또는 비밀번호가 틀립니다."
         )
-    # 아래 return 문을 수정합니다.
     return {
         "message": "로그인 성공!",
-        "username": user.username,  # DB에서 찾은 사용자 이름을 추가
-        "email": user.email        # DB에서 찾은 이메일을 추가
+        "username": user.username,
+        "email": user.email
     }
 
+@router.post("/groups")
+async def create_group_route(group_data: GroupCreate, db: Session = Depends(get_db)):
+    """새로운 그룹을 생성하고, 생성한 사용자를 해당 그룹에 자동으로 추가합니다."""
+    db_group = get_group_by_name(db, name=group_data.name)
+    if db_group:
+        raise HTTPException(status_code=400, detail="Group already exists")
+    
+    new_group = create_group(db=db, group_data=group_data)
+    user = get_user_by_username(db, username=group_data.username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    db_user_group = UserGroup(user_id=user.id, group_id=new_group.id)
+    db.add(db_user_group)
+    db.commit()
+    
+    return {"message": "그룹이 성공적으로 생성되었고, 사용자가 그룹에 추가되었습니다.", "group_id": new_group.id}
 
-# main 앱에 라우터를 포함시킵니다.
-app.include_router(router)
+@router.get("/user-groups/{username}")
+async def get_user_groups_route(username: str, db: Session = Depends(get_db)):
+    """특정 사용자가 속한 모든 그룹 목록을 반환합니다."""
+    groups = get_user_groups_by_username(db, username)
+    return [{"id": g.id, "name": g.name, "description": g.description} for g in groups]
 
+@router.delete("/groups/{group_id}")
+async def delete_group_route(group_id: int, db: Session = Depends(get_db)):
+    """특정 그룹을 삭제합니다."""
+    success = delete_group_by_id(db, group_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Group not found")
+    return {"message": "Group deleted successfully"}
 
+# --- WebSocket & Background Tasks ---
 @app.post("/api/notifications/pdf-complete")
 async def send_pdf_complete_notification():
+    """PDF 생성 완료 알림을 웹소켓으로 보냅니다."""
     message = json.dumps({"type": "pdf_complete"})
     await notification_manager.broadcast(message)
     return {"message": "Notification sent"}
 
+app.include_router(router)
+
 @app.websocket("/ws/notifications")
 async def notifications_ws(websocket: WebSocket):
+    """클라이언트와 웹소켓 연결을 설정합니다."""
     await notification_manager.connect(websocket)
     try:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
         notification_manager.disconnect(websocket)
-

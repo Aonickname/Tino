@@ -7,6 +7,7 @@ import 'settings/test_view.dart';
 import 'package:tino/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:tino/providers/user_provider.dart';
+import 'package:tino/screens/settings/group_setting.dart';
 
 
 class SettingScreen extends StatelessWidget {
@@ -78,8 +79,8 @@ class SettingScreen extends StatelessWidget {
 
             // 그룹 설정
             _buildSectionTitle('그룹 설정'),
-            _buildListItem('속한 그룹 보기', context, view_group()),
-            _buildListItem('그룹 생성', context, create_group()),
+            _buildListItem('그룹 관리', context, SettingGroupScreen()),
+            _buildListItem('그룹 생성', context, CreateGroupScreen()),
             _buildListItem('그룹 초대', context, invite_group()),
             SizedBox(height: 30),
 
