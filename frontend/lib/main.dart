@@ -12,7 +12,8 @@ import 'screens/schedule_screen.dart';
 import 'screens/settings_screen.dart';
 import 'widgets/bottom_navigation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:tino/screens/login_screen.dart';
+import 'package:tino/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 
 // ngrok 무료 플랜 SSL 인증서 무시 설정
@@ -58,27 +59,36 @@ Future<void> main() async {
     },
   );
 
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => UserProvider(), // UserProvider를 앱 전체에 제공
+      child: const MyApp(),
+    ),
+  );
 }
 
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
+    // UserProvider에서 사용자 정보를 가져옵니다.
+    final userProvider = Provider.of<UserProvider>(context);
+
+    // 로그인 상태에 따라 다른 화면을 보여줍니다.
     return MaterialApp(
       title: 'Tino',
       debugShowCheckedModeBanner: false,
-      // home: MainScreen(),
-      home: LoginScreen(),
+      home: userProvider.username != null ? MainScreen() : const LoginScreen(),
       theme: ThemeData(
-        dialogTheme: DialogThemeData(
+        dialogTheme: const DialogThemeData(
           backgroundColor: Colors.white,
         ),
       ),
     );
   }
 }
-
 
 class MainScreen extends StatefulWidget {
   @override

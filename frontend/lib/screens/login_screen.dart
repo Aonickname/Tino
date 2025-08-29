@@ -3,6 +3,8 @@ import 'package:tino/main.dart';
 import 'package:tino/screens/signup_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:tino/providers/user_provider.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -41,8 +43,41 @@ class _LoginScreenState extends State<LoginScreen> {
       }),
     );
 
+  //   if (response.statusCode == 200) {
+  //     ScaffoldMessenger.of(context).showSnackBar(_buildSnackBar('로그인 성공!'));
+  //     Navigator.pushReplacement(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => MainScreen()),
+  //     );
+  //   } else {
+  //     final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+  //     final errorMessage = errorData['detail'];
+  //     ScaffoldMessenger.of(context).showSnackBar(_buildSnackBar('로그인 실패: $errorMessage', isSuccess: false));
+  //   }
+  // }
+
     if (response.statusCode == 200) {
+      final userData = jsonDecode(utf8.decode(response.bodyBytes));
+      print('Server Response: $userData');
+
+      // userData에서 username과 email이 없으면 null을 반환하도록 합니다.
+      final username = userData['username'];
+      final email = userData['email'];
+
+      // null 값인지 확인하고, 만약 null이면 오류 처리
+      if (username == null || email == null) {
+        ScaffoldMessenger.of(context).showSnackBar(_buildSnackBar('서버 응답에 사용자 정보가 누락되었습니다.', isSuccess: false));
+        return;
+      }
+
+      // 1. UserProvider에 사용자 정보를 저장합니다.
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.setUser(username, email);
+
+      // 2. 로그인 성공 스낵바를 표시합니다.
       ScaffoldMessenger.of(context).showSnackBar(_buildSnackBar('로그인 성공!'));
+
+      // 3. MainScreen으로 이동합니다.
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainScreen()),

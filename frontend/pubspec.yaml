@@ -32,6 +32,7 @@ dependencies:
   sqflite: ^2.2.8
   flutter_dotenv: ^5.2.1
   flutter_launcher_icons: ^0.13.1
+  provider: ^6.1.5+1
 
 
 

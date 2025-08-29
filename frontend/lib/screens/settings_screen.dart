@@ -4,11 +4,20 @@ import 'settings/profile_info.dart';
 import 'settings/device_setting.dart';
 import 'settings/group_setting.dart';
 import 'settings/test_view.dart';
+import 'package:tino/screens/login_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:tino/providers/user_provider.dart';
 
 
 class SettingScreen extends StatelessWidget {
+
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final username = userProvider.username ?? '이름 없음'; // 사용자 이름이 없으면 '이름 없음'
+    final email = userProvider.email ?? '이메일 없음'; // 이메일이 없으면 '이메일 없음'
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -26,12 +35,12 @@ class SettingScreen extends StatelessWidget {
                     SizedBox(height: 20),
 
                     Text(
-                      '이름',
+                      username + " 님",
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'email@tukorea.ac.kr',
+                      email,
                       style: TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -39,6 +48,13 @@ class SettingScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     print("로그아웃 완료");
+                    userProvider.clearUser();
+
+                    // 2. 로그인 화면으로 이동
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,

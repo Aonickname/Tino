@@ -194,6 +194,10 @@ mysql_client
 2.16
 file:///Users/sebin/.pub-cache/hosted/pub.dev/mysql_client-0.0.27/
 file:///Users/sebin/.pub-cache/hosted/pub.dev/mysql_client-0.0.27/lib/
+nested
+2.12
+file:///Users/sebin/.pub-cache/hosted/pub.dev/nested-1.0.0/
+file:///Users/sebin/.pub-cache/hosted/pub.dev/nested-1.0.0/lib/
 path
 3.4
 file:///Users/sebin/.pub-cache/hosted/pub.dev/path-1.9.1/
@@ -266,6 +270,10 @@ protobuf
 2.12
 file:///Users/sebin/.pub-cache/hosted/pub.dev/protobuf-2.1.0/
 file:///Users/sebin/.pub-cache/hosted/pub.dev/protobuf-2.1.0/lib/
+provider
+2.12
+file:///Users/sebin/.pub-cache/hosted/pub.dev/provider-6.1.5+1/
+file:///Users/sebin/.pub-cache/hosted/pub.dev/provider-6.1.5+1/lib/
 record
 3.4
 file:///Users/sebin/.pub-cache/hosted/pub.dev/record-5.2.1/

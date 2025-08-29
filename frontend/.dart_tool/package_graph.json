@@ -21,6 +21,7 @@
         "mysql_client",
         "path_provider",
         "permission_handler",
+        "provider",
         "record",
         "smooth_page_indicator",
         "speech_to_text",
@@ -81,6 +82,15 @@
         "json_annotation",
         "path",
         "yaml"
+      ]
+    },
+    {
+      "name": "provider",
+      "version": "6.1.5+1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "nested"
       ]
     },
     {
@@ -500,6 +510,13 @@
       "name": "args",
       "version": "2.7.0",
       "dependencies": []
+    },
+    {
+      "name": "nested",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter"
+      ]
     },
     {
       "name": "sqflite_common",

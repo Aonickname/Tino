@@ -314,6 +314,12 @@
       "languageVersion": "2.16"
     },
     {
+      "name": "nested",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/nested-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "path",
       "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/path-1.9.1",
       "packageUri": "lib/",
@@ -418,6 +424,12 @@
     {
       "name": "protobuf",
       "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/protobuf-2.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "provider",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/provider-6.1.5+1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
