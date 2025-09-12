@@ -55,6 +55,7 @@ from fpdf import FPDF
 # 프로젝트 내부 모듈
 from api import meetings
 from api.websockets import manager as notification_manager
+from api.websockets import router as websockets_router
 
 # --- 환경 변수 로드 ---
 # .env 파일에서 필요한 값들을 불러옵니다.
@@ -74,6 +75,7 @@ app = FastAPI()
 router = APIRouter(prefix="/api", tags=["Users API"])
 
 app.include_router(meetings.router, prefix="/api", tags=["Meetings API"])
+app.include_router(websockets_router)
 
 
 # 모든 출처(CORS)에서 요청을 허용하도록 설정합니다.

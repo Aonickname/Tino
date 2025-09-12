@@ -8,5 +8,8 @@
 	<true/>
 	<key>com.apple.security.network.server</key>
 	<true/>
+    <key>com.apple.developer.speech-recognition</key>
+    <true/>
+
 </dict>
 </plist>

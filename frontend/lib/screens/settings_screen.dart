@@ -8,6 +8,7 @@ import 'package:tino/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:tino/providers/user_provider.dart';
 import 'package:tino/screens/settings/group_setting.dart';
+import 'package:tino/screens/settings/test_view.dart';
 
 
 class SettingScreen extends StatelessWidget {
@@ -101,6 +102,10 @@ class SettingScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AzureSTTPage(
+                      // 3가지 필수 준비물을 모두 챙겨줘요.
+                      meetingName: "나의 첫 회의",            // 예시 이름
+                      meetingDescription: "음성 인식 테스트",  // 예시 설명
+                      meetingDate: DateTime.now(),
                     ),
                   ),
                 );

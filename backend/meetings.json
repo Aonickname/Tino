@@ -1,27 +1,27 @@
 {
-    "2025-08-26": [
-        {
-            "name": "저녁 메뉴 선정",
-            "description": "test",
-            "is_interested": true,
-            "is_ended": true,
-            "directory": "20250624_저녁_메뉴_선정_4746c8"
-        }
-    ],
-    "2025-08-29": [
-        {
-            "name": "대선후보 토론회",
-            "description": "ss",
-            "is_interested": false,
-            "is_ended": true,
-            "directory": "20250623_대선후보_토론회_e0053a"
-        },
-        {
-            "name": "저녁2",
-            "description": "저녁메뉴s",
-            "is_interested": false,
-            "is_ended": true,
-            "directory": "20250624_저녁2_869531"
-        }
-    ]
+  "2025-08-26": [
+    {
+      "name": "저녁 메뉴 선정",
+      "description": "test",
+      "is_interested": true,
+      "is_ended": true,
+      "directory": "20250624_저녁_메뉴_선정_4746c8"
+    }
+  ],
+  "2025-08-29": [
+    {
+      "name": "대선후보 토론회",
+      "description": "ss",
+      "is_interested": false,
+      "is_ended": true,
+      "directory": "20250623_대선후보_토론회_e0053a"
+    },
+    {
+      "name": "저녁2",
+      "description": "저녁메뉴s",
+      "is_interested": false,
+      "is_ended": true,
+      "directory": "20250624_저녁2_869531"
+    }
+  ]
 }

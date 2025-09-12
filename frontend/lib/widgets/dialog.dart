@@ -77,30 +77,6 @@ class CustomDialogs {
                       ),
                       SizedBox(height: 10),
 
-                      // 날짜 선택 ListTile
-                      // ListTile(
-                      //   title: Text(
-                      //     selectedDate == null
-                      //         ? '날짜를 선택하세요'
-                      //         : DateFormat('yyyy-MM-dd').format(selectedDate!),
-                      //     style: TextStyle(color: Colors.black87),
-                      //   ),
-                      //   trailing: Icon(Icons.calendar_today),
-                      //   onTap: () async {
-                      //     // 날짜 선택기 표시
-                      //     DateTime? pickedDate = await showDatePicker(
-                      //       context: context,
-                      //       initialDate: DateTime.now(),
-                      //       firstDate: DateTime(2000),
-                      //       lastDate: DateTime(2101),
-                      //     );
-                      //     if (pickedDate != null && pickedDate != selectedDate) {
-                      //       setState(() {
-                      //         selectedDate = pickedDate;
-                      //       });
-                      //     }
-                      //   },
-                      // ),
                     ListTile(
                       title: Text(
                         selectedDate == null

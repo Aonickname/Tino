@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tino/screens/login_screen.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -80,7 +81,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Tino',
       debugShowCheckedModeBanner: false,
-      home: userProvider.username != null ? MainScreen() : const LoginScreen(),
+      // home: userProvider.username != null ? MainScreen() : const LoginScreen(),
+      home: MainScreen(), // 로그인 화면 건너 뛰고 바로 main으로 이동
       theme: ThemeData(
         dialogTheme: const DialogThemeData(
           backgroundColor: Colors.white,
@@ -91,8 +93,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
-  _MainScreenState createState() => _MainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
@@ -109,12 +113,22 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _setupNotifications(); // 알림 관련 로직을 하나의 함수로 호출
+    _setupPermissions(); // 앱 시작 시 권한 요청 함수 호출
   }
 
-  // 알림 및 웹소켓 관련 코드
-  void _setupNotifications() {
-    // iOS 알림 권한 요청
+  // 알림 및 권한 관련 코드를 한 곳에서 처리하는 함수
+  void _setupPermissions() async {
+    // 1. 마이크 권한 상태를 먼저 확인
+    var microphoneStatus = await Permission.microphone.status;
+    print("🎤 현재 마이크 권한 상태: $microphoneStatus");
+
+    // 2. 만약 권한을 아직 요청하지 않았다면 (isDenied), 요청 팝업을 띄움
+    if (microphoneStatus.isDenied) {
+      microphoneStatus = await Permission.microphone.request();
+      print("🎤 마이크 권한 요청 결과: $microphoneStatus");
+    }
+
+    // 3. iOS 알림 권한 요청 (기존 코드)
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>()
@@ -124,6 +138,7 @@ class _MainScreenState extends State<MainScreen> {
       sound: true,
     );
 
+    // 4. 웹소켓 및 푸시 알림 설정
     final notificationUrl = dotenv.env['NOTIFICATION_WEBSOCKET_URL'];
 
     if (notificationUrl == null || notificationUrl.isEmpty) {
@@ -132,7 +147,6 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     try {
-      // WebSocket 연결
       _wsChannel = IOWebSocketChannel.connect(
         Uri.parse(notificationUrl),
         customClient: HttpClient()
@@ -141,7 +155,6 @@ class _MainScreenState extends State<MainScreen> {
 
       print('WebSocket 연결 시도: $notificationUrl');
 
-      // 웹소켓 메시지 수신 리스너
       _wsChannel.stream.listen(
             (message) {
           print('웹소켓 알림 수신: $message');
@@ -151,14 +164,14 @@ class _MainScreenState extends State<MainScreen> {
               1,
               '회의 분석 완료 🎉',
               '결과를 확인하세요.',
-              NotificationDetails(
+              const NotificationDetails(
                 android: AndroidNotificationDetails(
                   'pdf_channel', 'PDF 알림',
                   channelDescription: '요약 PDF 생성 완료 알림',
                   importance: Importance.high,
                   priority: Priority.high,
                 ),
-                iOS: const DarwinNotificationDetails(
+                iOS: DarwinNotificationDetails(
                   presentAlert: true,
                   presentBadge: true,
                   presentSound: true,
@@ -181,8 +194,10 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
-    // 앱 종료 시 웹소켓 연결을 닫습니다.
-    _wsChannel.sink.close();
+    // _wsChannel이 초기화되었을 경우에만 sink를 닫습니다.
+    if (this.mounted && _wsChannel != null) {
+      _wsChannel.sink.close();
+    }
     super.dispose();
   }
 

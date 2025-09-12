@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
       ) async {
     final baseUrl = dotenv.env['API_BASE_URL'];
-    final url = Uri.parse('$baseUrl/meetings');
+    final url = Uri.parse('$baseUrl/api/create_new_meeting');
 
     final body = {
       "name": name,
@@ -284,6 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // 녹음 업로드
                 InkWell(
+
                   onTap: () {
                     CustomDialogs.showInputDialogUpload(
                       context,

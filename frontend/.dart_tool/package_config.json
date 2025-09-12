@@ -104,6 +104,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "file",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/file-7.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "file_picker",
       "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/file_picker-8.3.7",
       "packageUri": "lib/",
@@ -308,6 +314,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "mime",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/mime-1.0.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "mysql_client",
       "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/mysql_client-0.0.27",
       "packageUri": "lib/",
@@ -476,6 +488,18 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "share_plus",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/share_plus-7.2.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "share_plus_platform_interface",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/share_plus_platform_interface-3.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
       "name": "simple_gesture_detector",
       "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/simple_gesture_detector-0.2.1",
       "packageUri": "lib/",
@@ -612,6 +636,30 @@
       "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/unorm_dart-0.3.1+1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "url_launcher_linux",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "url_launcher_platform_interface",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/url_launcher_platform_interface-2.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "url_launcher_web",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "url_launcher_windows",
+      "rootUri": "file:///Users/sebin/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "uuid",

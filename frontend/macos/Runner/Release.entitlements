@@ -4,5 +4,8 @@
 <dict>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
+	<key>com.apple.developer.speech-recognition</key>
+    <true/>
+
 </dict>
 </plist>

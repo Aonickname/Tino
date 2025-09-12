@@ -10,6 +10,9 @@ from urllib.parse import unquote
 from models.meeting_schemas import Meeting
 from fastapi import FastAPI, Body
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
+import uuid
+from models.meeting_schemas import MeetingData
 
 
 
@@ -22,8 +25,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #회의 정보를 저장할 JSON 파일 경로
 MEETINGS_JSON_PATH = os.path.join(BASE_DIR, "meetings.json")
 
-
 # GET: 회의 조회
+# 그룹별로 데이터 조회 구분
 @router.get("/meetings")
 def get_meetings():
     try:
@@ -38,6 +41,7 @@ def get_meetings():
         raise HTTPException(status_code=500, detail="서버에서 파일을 읽는 중 오류가 발생했습니다.")
     
 # POST: 회의 추가
+# 이 코드가 create_new_meetings의 기존 코드인 듯
 @router.post("/meetings")
 def add_meeting(meeting: Meeting):
     try:
@@ -147,87 +151,149 @@ async def upload_meeting_with_file(
     except Exception as e:
         print(f"Error uploading file: {e}")
         raise HTTPException(status_code=500, detail="파일 업로드 중 서버 오류가 발생했습니다.")
-    
+ 
+
     
 # 새로운 회의
-@router.post("/upload_meeting_aac")
-async def upload_meeting_aac(
-    background_tasks: BackgroundTasks,
-    meetingName: str = Form(...),
-    meetingDescription: str = Form(...),
-    meetingDate: str = Form(...),
-    file: UploadFile = File(...)
-):
+@router.post("/create_new_meeting")
+async def create_new_meeting(meeting_data: MeetingData):
     try:
-        # ✅ 요청 수신 로그 추가
-        print("📥 [upload_meeting_aac] POST 요청 수신됨")
-        print(f"📌 회의명: {meetingName}, 날짜: {meetingDate}, 설명: {meetingDescription}")
-        print(f"📁 업로드된 파일명: {file.filename}, 콘텐츠 타입: {file.content_type}")
+        print("📥 [create_new_meeting] POST 요청 수신됨")
+        print(f"📌 회의명: {meeting_data.name}, 날짜: {meeting_data.date}, 설명: {meeting_data.description}")
 
-        # 기본 디렉토리 설정
-        # base_dir = os.path.dirname(__file__)
+        # 회의 데이터를 저장할 meetings.json 파일 경로를 설정합니다.
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        upload_root = os.path.join(base_dir, "uploaded_files")
-
-        # 폴더 생성
-        safe_name = meetingName.replace(" ", "_")[:15]
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        unique_id = uuid.uuid4().hex[:6]
-        folder_name = f"{timestamp}_{safe_name}_{unique_id}"
-        folder_path = os.path.join(upload_root, folder_name)
-        os.makedirs(folder_path, exist_ok=True)
-
-        # AAC 저장
-        aac_path = os.path.join(folder_path, "audio.aac")
-        try:
-            with open(aac_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
-            print(f"✅ AAC 파일 저장 완료: {aac_path}")
-        except Exception as e:
-            print(f"❌ AAC 저장 중 오류: {repr(e)}")
-
-        # meetings.json 기록 추가
-        print("📝 meetings.json 기록 준비 중")
         meetings_path = os.path.join(base_dir, "meetings.json")
+
+        # 기존 meetings.json 파일이 있으면 불러오고, 없으면 빈 딕셔너리를 만듭니다.
         if os.path.exists(meetings_path):
             with open(meetings_path, "r", encoding="utf-8") as f:
                 meetings = json.load(f)
         else:
             meetings = {}
 
+        # 업로드 파일의 루트 디렉토리를 설정합니다.
+        upload_root = os.path.join(base_dir, "uploaded_files")
+
+        # 회의명으로 안전한 폴더 이름 생성
+        safe_name = meeting_data.name.replace(" ", "_")[:15]
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        unique_id = uuid.uuid4().hex[:6]
+        folder_name = f"{timestamp}_{safe_name}_{unique_id}"
+        folder_path = os.path.join(upload_root, folder_name)
+
+        # 실제로 폴더를 생성합니다.
+        os.makedirs(folder_path, exist_ok=True)
+        print(f"✅ 고유 폴더 생성 완료: {folder_path}")
+
+        # 회의 정보를 담을 객체를 만듭니다.
         meeting_obj = {
-            "name": meetingName,
-            "description": meetingDescription,
-            "is_interested": False,
-            "is_ended": True,
+            "name": meeting_data.name,
+            "description": meeting_data.description,
+            "is_interested": meeting_data.is_interested,
+            "is_ended": meeting_data.is_ended,
             "directory": folder_name
         }
 
-        if meetingDate not in meetings:
-            meetings[meetingDate] = []
-        meetings[meetingDate].append(meeting_obj)
+        # 날짜별로 회의 목록을 그룹화하여 저장합니다.
+        if meeting_data.date not in meetings:
+            meetings[meeting_data.date] = []
+        meetings[meeting_data.date].append(meeting_obj)
 
+        # 수정된 내용을 meetings.json 파일에 저장합니다.
         with open(meetings_path, "w", encoding="utf-8") as f:
             json.dump(meetings, f, ensure_ascii=False, indent=2)
 
-        # 백그라운드 작업 등록
-        summary_mode = "기본"
-        custom_prompt = None
-
-        print(f"🟡 백그라운드 작업 등록 시작: {aac_path}")
-        background_tasks.add_task(
-            transcribe_and_save_to_json,
-            aac_path,
-            folder_path,
-            summary_mode,
-            custom_prompt
-        )
-
-        return {"message": "✅ AAC 파일 업로드 및 처리 시작", "directory": folder_name}
+        print("✅ 회의 정보 저장 완료")
+        
+        # ⭐️ 클라이언트에 생성된 폴더 이름을 함께 응답합니다.
+        return {"message": "✅ 회의 정보 생성 완료", "directory": folder_name}
 
     except Exception as e:
         print("🔴 에러 발생:", e)
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        # JSONResponse를 사용하려면 `from fastapi.responses import JSONResponse`를 추가해야 합니다.
+        # return JSONResponse(status_code=500, content={"error": str(e)})
+        # 또는 간단히 딕셔너리를 반환할 수도 있습니다.
+        return {"error": str(e)}
+
+
+# @router.post("/create_new_meetings")
+# async def upload_meeting_aac(
+#     background_tasks: BackgroundTasks,
+#     meetingName: str = Form(...),
+#     meetingDescription: str = Form(...),
+#     meetingDate: str = Form(...),
+#     # file: UploadFile = File(...)
+# ):
+#     try:
+#         # ✅ 요청 수신 로그 추가
+#         print("📥 [upload_meeting_aac] POST 요청 수신됨")
+#         print(f"📌 회의명: {meetingName}, 날짜: {meetingDate}, 설명: {meetingDescription}")
+#         print(f"📁 업로드된 파일명: {file.filename}, 콘텐츠 타입: {file.content_type}")
+
+#         # 기본 디렉토리 설정
+#         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#         upload_root = os.path.join(base_dir, "uploaded_files")
+
+#         # 폴더 생성
+#         safe_name = meetingName.replace(" ", "_")[:15]
+#         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#         unique_id = uuid.uuid4().hex[:6]
+#         folder_name = f"{timestamp}_{safe_name}_{unique_id}"
+#         folder_path = os.path.join(upload_root, folder_name)
+#         os.makedirs(folder_path, exist_ok=True)
+
+#         # AAC 저장
+#         aac_path = os.path.join(folder_path, "audio.aac")
+#         try:
+#             with open(aac_path, "wb") as buffer:
+#                 shutil.copyfileobj(file.file, buffer)
+#             print(f"✅ AAC 파일 저장 완료: {aac_path}")
+#         except Exception as e:
+#             print(f"❌ AAC 저장 중 오류: {repr(e)}")
+
+#         # meetings.json 기록 추가
+#         print("📝 meetings.json 기록 준비 중")
+#         meetings_path = os.path.join(base_dir, "meetings.json")
+#         if os.path.exists(meetings_path):
+#             with open(meetings_path, "r", encoding="utf-8") as f:
+#                 meetings = json.load(f)
+#         else:
+#             meetings = {}
+
+#         meeting_obj = {
+#             "name": meetingName,
+#             "description": meetingDescription,
+#             "is_interested": False,
+#             "is_ended": True,
+#             "directory": folder_name
+#         }
+
+#         if meetingDate not in meetings:
+#             meetings[meetingDate] = []
+#         meetings[meetingDate].append(meeting_obj)
+
+#         with open(meetings_path, "w", encoding="utf-8") as f:
+#             json.dump(meetings, f, ensure_ascii=False, indent=2)
+
+#         # 백그라운드 작업 등록
+#         summary_mode = "기본"
+#         custom_prompt = None
+
+#         print(f"🟡 백그라운드 작업 등록 시작: {aac_path}")
+#         background_tasks.add_task(
+#             transcribe_and_save_to_json,
+#             aac_path,
+#             folder_path,
+#             summary_mode,
+#             custom_prompt
+#         )
+
+#         return {"message": "✅ AAC 파일 업로드 및 처리 시작", "directory": folder_name}
+
+#     except Exception as e:
+#         print("🔴 에러 발생:", e)
+#         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 # DELETE: 회의 삭제
@@ -384,6 +450,7 @@ async def edit_meeting_content(payload: dict):
     
     
 # GET: summary.json 출력
+# 그룹별 데이터 조회
 @router.get("/summary/{directory}") 
 def get_summary_json(directory: str):
     try:

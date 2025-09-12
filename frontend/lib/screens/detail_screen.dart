@@ -8,6 +8,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'dart:async';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:share_plus/share_plus.dart';
 
 
 // 초 단위 시간을 "MM:SS"로
@@ -148,6 +149,38 @@ class _DetailScreenState extends State<DetailScreen> {
   //   }
   // }
 
+
+  // 회의록 다운로드 버튼
+  // Future<void> downloadPdf() async {
+  //   final baseUrl = dotenv.env['API_BASE_URL'];
+  //   final resp = await http.get(Uri.parse(
+  //       '$baseUrl/api/pdf/${Uri.encodeComponent(widget.directory)}'
+  //   ));
+  //
+  //   if (resp.statusCode == 200) {
+  //     // 파일명 정리
+  //     final name = widget.name
+  //         .replaceAll(RegExp(r'[\\/:*?"<>|]'),'')
+  //         .replaceAll(' ','_');
+  //
+  //     // 플랫폼에 따라 저장 폴더 경로를 가져옵니다.
+  //     // iOS의 경우 getApplicationDocumentsDirectory() 사용
+  //     final dir = await getApplicationDocumentsDirectory();
+  //
+  //     //앱 내에서 숨겨진 저장소 보기(TEST)
+  //     // final files = dir.listSync();
+  //     // 파일 객체 생성 및 바이트 쓰기
+  //     final file = File('${dir.path}/${name}_회의록.pdf');
+  //     await file.writeAsBytes(resp.bodyBytes);
+  //
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text('PDF 다운로드 완료')));
+  //
+  //   } else {
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패')));
+  //   }
+  // }
   Future<void> downloadPdf() async {
     final baseUrl = dotenv.env['API_BASE_URL'];
     final resp = await http.get(Uri.parse(
@@ -155,25 +188,36 @@ class _DetailScreenState extends State<DetailScreen> {
     ));
 
     if (resp.statusCode == 200) {
-      // 파일명 정리
-      final name = widget.name
-          .replaceAll(RegExp(r'[\\/:*?"<>|]'),'')
-          .replaceAll(' ','_');
+      try {
+        // 파일명 정리
+        final name = widget.name
+            .replaceAll(RegExp(r'[\\/:*?"<>|]'), '')
+            .replaceAll(' ', '_');
+        final fileName = '${name}_회의록.pdf';
 
-      // 플랫폼에 따라 저장 폴더 경로를 가져옵니다.
-      // iOS의 경우 getApplicationDocumentsDirectory() 사용
-      final dir = await getApplicationDocumentsDirectory();
+        // 1. 앱의 임시 폴더에 파일을 저장합니다. (내 방 서랍에 잠시 두는 것)
+        final dir = await getTemporaryDirectory(); // Documents 대신 Temporary 사용
+        final file = File('${dir.path}/$fileName');
+        await file.writeAsBytes(resp.bodyBytes);
 
-      // 파일 객체 생성 및 바이트 쓰기
-      final file = File('${dir.path}/${name}_회의록.pdf');
-      await file.writeAsBytes(resp.bodyBytes);
+        // 2. 저장된 파일을 '공유하기' 기능으로 사용자에게 전달합니다.
+        await Share.shareXFiles(
+          [XFile(file.path, name: fileName)],
+          text: '회의록 파일이 생성되었습니다.',
+        );
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('PDF 다운로드 완료')));
+        // 공유가 끝나면 임시 파일은 삭제해도 됩니다 (선택 사항)
+        // await file.delete();
+
+      } catch (e) {
+        print('Error sharing PDF: $e');
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('PDF 공유에 실패했습니다.')));
+      }
 
     } else {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패')));
+          .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패: ${resp.statusCode}')));
     }
   }
 
@@ -333,6 +377,9 @@ class _DetailScreenState extends State<DetailScreen> {
             SizedBox(height:8),
             Text('날짜: ${widget.date}'),
             SizedBox(height:16),
+
+
+            // 회의록 다운로드 버튼
             ElevatedButton.icon(
               icon: Icon(Icons.download),
               label: Text('회의록 다운로드',style:TextStyle(fontSize:12)),
@@ -343,7 +390,14 @@ class _DetailScreenState extends State<DetailScreen> {
                 padding:EdgeInsets.symmetric(horizontal:10,vertical:5),
               ),
             ),
-            SizedBox(height:20),
+
+            SizedBox(height: 20),
+            //
+            // ExpansionTile(
+            //   title: Text('IOS 내부 저장소 viewer TEST',style:TextStyle(fontSize:18,fontWeight:FontWeight.w600)),
+            // ),
+            //
+            // SizedBox(height:20),
 
             // 화자 비율
             ExpansionTile(
