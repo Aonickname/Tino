@@ -8,7 +8,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'dart:async';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
+import 'package:device_info_plus/device_info_plus.dart';
+
 
 
 // 초 단위 시간을 "MM:SS"로
@@ -150,76 +152,136 @@ class _DetailScreenState extends State<DetailScreen> {
   // }
 
 
-  // 회의록 다운로드 버튼
-  // Future<void> downloadPdf() async {
-  //   final baseUrl = dotenv.env['API_BASE_URL'];
-  //   final resp = await http.get(Uri.parse(
-  //       '$baseUrl/api/pdf/${Uri.encodeComponent(widget.directory)}'
-  //   ));
-  //
-  //   if (resp.statusCode == 200) {
-  //     // 파일명 정리
-  //     final name = widget.name
-  //         .replaceAll(RegExp(r'[\\/:*?"<>|]'),'')
-  //         .replaceAll(' ','_');
-  //
-  //     // 플랫폼에 따라 저장 폴더 경로를 가져옵니다.
-  //     // iOS의 경우 getApplicationDocumentsDirectory() 사용
-  //     final dir = await getApplicationDocumentsDirectory();
-  //
-  //     //앱 내에서 숨겨진 저장소 보기(TEST)
-  //     // final files = dir.listSync();
-  //     // 파일 객체 생성 및 바이트 쓰기
-  //     final file = File('${dir.path}/${name}_회의록.pdf');
-  //     await file.writeAsBytes(resp.bodyBytes);
-  //
-  //     ScaffoldMessenger.of(context)
-  //         .showSnackBar(SnackBar(content: Text('PDF 다운로드 완료')));
-  //
-  //   } else {
-  //     ScaffoldMessenger.of(context)
-  //         .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패')));
-  //   }
-  // }
+// //  회의록 다운로드 버튼
+//   Future<void> downloadPdf() async {
+//     final baseUrl = dotenv.env['API_BASE_URL'];
+//     final resp = await http.get(Uri.parse(
+//         '$baseUrl/api/pdf/${Uri.encodeComponent(widget.directory)}'
+//     ));
+//
+//     if (resp.statusCode == 200) {
+//       // 파일명 정리
+//       final name = widget.name
+//           .replaceAll(RegExp(r'[\\/:*?"<>|]'),'')
+//           .replaceAll(' ','_');
+//
+//       // 플랫폼에 따라 저장 폴더 경로를 가져옵니다.
+//       // iOS의 경우 getApplicationDocumentsDirectory() 사용
+//       final dir = await getApplicationDocumentsDirectory();
+//
+//       //앱 내에서 숨겨진 저장소 보기(TEST)
+//       // final files = dir.listSync();
+//       // 파일 객체 생성 및 바이트 쓰기
+//       final file = File('${dir.path}/${name}_회의록.pdf');
+//       await file.writeAsBytes(resp.bodyBytes);
+//
+//       ScaffoldMessenger.of(context)
+//           .showSnackBar(SnackBar(content: Text('PDF 다운로드 완료')));
+//
+//     } else {
+//       ScaffoldMessenger.of(context)
+//           .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패')));
+//     }
+//   }
+
   Future<void> downloadPdf() async {
+    if (Platform.isAndroid) {
+      // 안드로이드 버전별 권한 요청
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      final int androidVersion = int.tryParse(androidInfo.version.release) ?? 0;
+
+      if (androidVersion > 12) {
+        // 안드로이드 13 (API 33) 이상
+        var photoStatus = await Permission.photos.request();
+        var videoStatus = await Permission.videos.request();
+        if (!photoStatus.isGranted || !videoStatus.isGranted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('PDF 다운로드를 위해 저장 권한이 필요합니다.')),
+          );
+          return;
+        }
+      } else {
+        // 안드로이드 12 (API 32) 이하
+        var storageStatus = await Permission.storage.request();
+        if (storageStatus.isDenied) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('PDF 다운로드를 위해 저장 권한이 필요합니다.')),
+          );
+          return;
+        }
+      }
+    }
+
     final baseUrl = dotenv.env['API_BASE_URL'];
     final resp = await http.get(Uri.parse(
         '$baseUrl/api/pdf/${Uri.encodeComponent(widget.directory)}'
     ));
 
+    //   if (resp.statusCode == 200) {
+    //     final name = widget.name
+    //         .replaceAll(RegExp(r'[\\/:*?"<>|]'),'')
+    //         .replaceAll(' ','_');
+    //
+    //     // 👇 이 부분이 중요해요! 공용 저장소 경로를 가져옵니다.
+    //     final directory = await getExternalStorageDirectory();
+    //     final downloadsPath = '${directory?.path}/Download';
+    //
+    //     // 폴더가 없다면 새로 만듭니다.
+    //     final saveDir = Directory(downloadsPath);
+    //     if (!await saveDir.exists()) {
+    //       await saveDir.create(recursive: true);
+    //     }
+    //
+    //     // 이 경로에 PDF 파일을 저장합니다.
+    //     final file = File('$downloadsPath/${name}_회의록.pdf');
+    //     await file.writeAsBytes(resp.bodyBytes);
+    //
+    //     ScaffoldMessenger.of(context)
+    //         .showSnackBar(SnackBar(content: Text('PDF 다운로드 완료')));
+    //
+    //   } else {
+    //     ScaffoldMessenger.of(context)
+    //         .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패')));
+    //   }
+    // }
     if (resp.statusCode == 200) {
-      try {
-        // 파일명 정리
-        final name = widget.name
-            .replaceAll(RegExp(r'[\\/:*?"<>|]'), '')
-            .replaceAll(' ', '_');
-        final fileName = '${name}_회의록.pdf';
+      final name = widget.name
+          .replaceAll(RegExp(r'[\\/:*?"<>|]'), '')
+          .replaceAll(' ','_');
 
-        // 1. 앱의 임시 폴더에 파일을 저장합니다. (내 방 서랍에 잠시 두는 것)
-        final dir = await getTemporaryDirectory(); // Documents 대신 Temporary 사용
-        final file = File('${dir.path}/$fileName');
-        await file.writeAsBytes(resp.bodyBytes);
+      // 👇 여기를 수정해주세요!
+      final downloadsDir = await getDownloadsDirectory();
+      final downloadsPath = downloadsDir?.path;
 
-        // 2. 저장된 파일을 '공유하기' 기능으로 사용자에게 전달합니다.
-        await Share.shareXFiles(
-          [XFile(file.path, name: fileName)],
-          text: '회의록 파일이 생성되었습니다.',
+      // 만약 다운로드 경로를 찾지 못하면 앱 전용 폴더를 대체 경로로 사용합니다.
+      if (downloadsPath == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('다운로드 폴더를 찾을 수 없습니다. 앱 전용 폴더에 저장합니다.')),
         );
-
-        // 공유가 끝나면 임시 파일은 삭제해도 됩니다 (선택 사항)
-        // await file.delete();
-
-      } catch (e) {
-        print('Error sharing PDF: $e');
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('PDF 공유에 실패했습니다.')));
+        final appDir = await getApplicationDocumentsDirectory();
+        final appDownloadsPath = '${appDir.path}/Download';
+        final appFile = File('$appDownloadsPath/${name}_회의록.pdf');
+        await appFile.create(recursive: true);
+        await appFile.writeAsBytes(resp.bodyBytes);
+      } else {
+        // 공용 다운로드 폴더에 파일을 저장합니다.
+        final file = File('$downloadsPath/${name}_회의록.pdf');
+        if (!await file.parent.exists()) {
+          await file.parent.create(recursive: true);
+        }
+        await file.writeAsBytes(resp.bodyBytes);
       }
+      // 👆 이 부분을 수정하면 됩니다.
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('PDF 다운로드 완료')));
 
     } else {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패: ${resp.statusCode}')));
+          .showSnackBar(SnackBar(content: Text('PDF 다운로드 실패')));
     }
   }
+
 
   Future<void> fetchResultJson() async {
     final baseUrl = dotenv.env['API_BASE_URL'];

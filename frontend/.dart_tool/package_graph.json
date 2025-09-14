@@ -8,10 +8,12 @@
       "version": "1.0.0+1",
       "dependencies": [
         "carousel_slider",
+        "device_info_plus",
         "file_picker",
         "fl_chart",
         "flutter",
         "flutter_dotenv",
+        "flutter_downloader",
         "flutter_launcher_icons",
         "flutter_local_notifications",
         "flutter_sound",
@@ -83,6 +85,13 @@
         "json_annotation",
         "path",
         "yaml"
+      ]
+    },
+    {
+      "name": "flutter_downloader",
+      "version": "1.12.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -539,6 +548,66 @@
       ]
     },
     {
+      "name": "ffi",
+      "version": "2.1.3",
+      "dependencies": []
+    },
+    {
+      "name": "url_launcher_platform_interface",
+      "version": "2.3.2",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_linux",
+      "version": "3.2.1",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_windows",
+      "version": "3.1.4",
+      "dependencies": [
+        "flutter",
+        "url_launcher_platform_interface"
+      ]
+    },
+    {
+      "name": "url_launcher_web",
+      "version": "2.4.1",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "url_launcher_platform_interface",
+        "web"
+      ]
+    },
+    {
+      "name": "file",
+      "version": "7.0.1",
+      "dependencies": [
+        "meta",
+        "path"
+      ]
+    },
+    {
+      "name": "share_plus_platform_interface",
+      "version": "3.4.0",
+      "dependencies": [
+        "cross_file",
+        "flutter",
+        "meta",
+        "mime",
+        "path_provider",
+        "plugin_platform_interface",
+        "uuid"
+      ]
+    },
+    {
       "name": "flutter_web_plugins",
       "version": "0.0.0",
       "dependencies": [
@@ -551,8 +620,8 @@
       ]
     },
     {
-      "name": "ffi",
-      "version": "2.1.3",
+      "name": "mime",
+      "version": "1.0.6",
       "dependencies": []
     },
     {
@@ -1011,63 +1080,34 @@
       ]
     },
     {
-      "name": "share_plus_platform_interface",
-      "version": "3.4.0",
+      "name": "device_info_plus",
+      "version": "9.1.2",
       "dependencies": [
-        "cross_file",
+        "device_info_plus_platform_interface",
+        "ffi",
+        "file",
+        "flutter",
+        "flutter_web_plugins",
+        "meta",
+        "win32",
+        "win32_registry"
+      ]
+    },
+    {
+      "name": "device_info_plus_platform_interface",
+      "version": "7.0.3",
+      "dependencies": [
         "flutter",
         "meta",
-        "mime",
-        "path_provider",
-        "plugin_platform_interface",
-        "uuid"
-      ]
-    },
-    {
-      "name": "mime",
-      "version": "1.0.6",
-      "dependencies": []
-    },
-    {
-      "name": "file",
-      "version": "7.0.1",
-      "dependencies": [
-        "meta",
-        "path"
-      ]
-    },
-    {
-      "name": "url_launcher_linux",
-      "version": "3.2.1",
-      "dependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ]
-    },
-    {
-      "name": "url_launcher_platform_interface",
-      "version": "2.3.2",
-      "dependencies": [
-        "flutter",
         "plugin_platform_interface"
       ]
     },
     {
-      "name": "url_launcher_windows",
-      "version": "3.1.4",
+      "name": "win32_registry",
+      "version": "1.1.5",
       "dependencies": [
-        "flutter",
-        "url_launcher_platform_interface"
-      ]
-    },
-    {
-      "name": "url_launcher_web",
-      "version": "2.4.1",
-      "dependencies": [
-        "flutter",
-        "flutter_web_plugins",
-        "url_launcher_platform_interface",
-        "web"
+        "ffi",
+        "win32"
       ]
     }
   ],

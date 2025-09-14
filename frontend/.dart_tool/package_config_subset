@@ -54,6 +54,14 @@ dbus
 2.17
 file:///Users/sebin/.pub-cache/hosted/pub.dev/dbus-0.7.11/
 file:///Users/sebin/.pub-cache/hosted/pub.dev/dbus-0.7.11/lib/
+device_info_plus
+2.18
+file:///Users/sebin/.pub-cache/hosted/pub.dev/device_info_plus-9.1.2/
+file:///Users/sebin/.pub-cache/hosted/pub.dev/device_info_plus-9.1.2/lib/
+device_info_plus_platform_interface
+3.7
+file:///Users/sebin/.pub-cache/hosted/pub.dev/device_info_plus_platform_interface-7.0.3/
+file:///Users/sebin/.pub-cache/hosted/pub.dev/device_info_plus_platform_interface-7.0.3/lib/
 equatable
 2.12
 file:///Users/sebin/.pub-cache/hosted/pub.dev/equatable-2.0.7/
@@ -86,6 +94,10 @@ flutter_dotenv
 2.12
 file:///Users/sebin/.pub-cache/hosted/pub.dev/flutter_dotenv-5.2.1/
 file:///Users/sebin/.pub-cache/hosted/pub.dev/flutter_dotenv-5.2.1/lib/
+flutter_downloader
+3.6
+file:///Users/sebin/.pub-cache/hosted/pub.dev/flutter_downloader-1.12.0/
+file:///Users/sebin/.pub-cache/hosted/pub.dev/flutter_downloader-1.12.0/lib/
 flutter_launcher_icons
 2.18
 file:///Users/sebin/.pub-cache/hosted/pub.dev/flutter_launcher_icons-0.13.1/
@@ -446,6 +458,10 @@ win32
 3.7
 file:///Users/sebin/.pub-cache/hosted/pub.dev/win32-5.11.0/
 file:///Users/sebin/.pub-cache/hosted/pub.dev/win32-5.11.0/lib/
+win32_registry
+3.4
+file:///Users/sebin/.pub-cache/hosted/pub.dev/win32_registry-1.1.5/
+file:///Users/sebin/.pub-cache/hosted/pub.dev/win32_registry-1.1.5/lib/
 xdg_directories
 3.3
 file:///Users/sebin/.pub-cache/hosted/pub.dev/xdg_directories-1.1.0/

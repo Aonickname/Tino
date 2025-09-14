@@ -1,10 +1,10 @@
 from typing import List
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket, WebSocketDisconnect, APIRouter
 import os
 import asyncio
-from fastapi import APIRouter
 import azure.cognitiveservices.speech as speechsdk
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 router = APIRouter()
@@ -12,19 +12,25 @@ router = APIRouter()
 class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
+    
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
+    
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
+    
     async def broadcast(self, message: str):
         for connection in list(self.active_connections):
             try:
                 await connection.send_text(message)
             except:
                 self.disconnect(connection)
+
 manager = ConnectionManager()
 
+# ✨ 전역 변수로 선언하여 모든 연결에서 공유 ✨
+recordings = []
 
 # --- (STT 웹소켓 코드) ---
 SPEECH_KEY = os.getenv("SPEECH_KEY")
@@ -37,9 +43,8 @@ def run_coroutine_in_thread(coro):
     except RuntimeError:
         asyncio.run(coro)
 
-
-@router.websocket("/ws/stt")
-async def stt_websocket(websocket: WebSocket):
+@router.websocket("/ws/stt/{directory}")
+async def stt_websocket(websocket: WebSocket, directory: str):
     await websocket.accept()
     print("✅ STT 클라이언트가 연결되었습니다.")
 
@@ -54,8 +59,12 @@ async def stt_websocket(websocket: WebSocket):
 
     async def send_recognized_text(evt):
         if evt.result.reason == speechsdk.ResultReason.RecognizedSpeech and evt.result.text:
-            print(f"✅ 최종 인식: {evt.result.text}")
-            await websocket.send_text(evt.result.text)
+            recognized_text = evt.result.text
+            print(f"✅ 최종 인식: {recognized_text}")
+            await websocket.send_text(recognized_text)
+            
+            # 전역 리스트에 텍스트 추가
+            recordings.append({"text": recognized_text})
 
     speech_recognizer.recognized.connect(lambda evt: run_coroutine_in_thread(send_recognized_text(evt)))
     
@@ -63,6 +72,13 @@ async def stt_websocket(websocket: WebSocket):
     speech_recognizer.session_stopped.connect(lambda evt: print(f"--- 세션 중단됨 ---"))
 
     speech_recognizer.start_continuous_recognition_async()
+
+    # 파일이 저장될 기본 루트 폴더
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    upload_root = os.path.join(base_dir, "uploaded_files")
+
+    # 최종 파일 저장 경로를 만듭니다.
+    save_path = os.path.join(upload_root, directory, "result.json")
 
     try:
         while True:
@@ -75,3 +91,9 @@ async def stt_websocket(websocket: WebSocket):
         speech_recognizer.stop_continuous_recognition_async()
         push_stream.close()
         print("🗑️ STT 리소스를 정리했습니다.")
+        
+        # 최종 JSON 파일로 저장
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump({"segments": recordings}, f, ensure_ascii=False, indent=2)
+        
+        print(f"✅ 최종 JSON 파일이 '{save_path}'에 저장되었습니다.")

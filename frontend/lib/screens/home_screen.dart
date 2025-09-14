@@ -1,3 +1,5 @@
+// home_screen.dart
+
 import 'package:flutter/material.dart';
 import '../style.dart';
 import 'dart:ui';
@@ -23,15 +25,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // PageView 컨트롤러: 배너 이미지를 자동으로 넘기기 위해 사용
   final PageController _pageController = PageController(initialPage: 0);
-  int currentPage = 0;                    // 현재 보여지는 배너 페이지 인덱스
-  Timer? _timer;                          // 자동 스크롤을 위한 타이머
+  int currentPage = 0; // 현재 보여지는 배너 페이지 인덱스
+  Timer? _timer; // 자동 스크롤을 위한 타이머
 
-  bool _isLatestFirst = true;            // 회의 목록을 최신순/오래된순 토글
+  bool _isLatestFirst = true; // 회의 목록을 최신순/오래된순 토글
 
   @override
   void initState() {
     super.initState();
-    _startAutoScroll();                  // 화면 로드 시 배너 자동 스크롤 시작
+    _startAutoScroll(); // 화면 로드 시 배너 자동 스크롤 시작
   }
 
   // 배너를 3초마다 넘기는 타이머 설정
@@ -53,8 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();                    // 타이머 해제
-    _pageController.dispose();           // 컨트롤러 해제
+    _timer?.cancel(); // 타이머 해제
+    _pageController.dispose(); // 컨트롤러 해제
     super.dispose();
   }
 
@@ -107,10 +109,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// 새로운 회의를 JSON으로 서버에 저장
-  Future<void> saveMeetingToServer(String name, String description, String date, {
+  // ⭐️ saveMeetingToServer 함수가 서버 응답을 반환하도록 변경합니다.
+  Future<String?> saveMeetingToServer(String name, String description, String date, {
     bool is_interested = false, bool is_ended = false
-  }
-      ) async {
+  }) async {
     final baseUrl = dotenv.env['API_BASE_URL'];
     final url = Uri.parse('$baseUrl/api/create_new_meeting');
 
@@ -131,11 +133,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (response.statusCode == 200) {
         print("회의 저장 완료!");
+        final responseData = json.decode(response.body);
+        return responseData['directory']; // ⭐️ 서버에서 받은 디렉토리 이름을 반환합니다.
       } else {
         print("서버 오류: ${response.statusCode}");
+        return null;
       }
     } catch (e) {
       print("에러 발생: $e");
+      return null;
     }
   }
 
@@ -206,7 +212,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // 배너 이미지 자동 슬라이드
             Container(
-
               height: 200,
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Stack(
@@ -255,20 +260,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     CustomDialogs.showInputDialogNewMeeting(
                       context,
                           (name, description, date) async {
-                        // 회의명, 설명, 날짜 입력 후 서버 저장
-                        await saveMeetingToServer(name, description, date.toIso8601String());
+                        // ⭐️ saveMeetingToServer 함수를 호출하고 반환 값을 받습니다.
+                        final meetingDirectory = await saveMeetingToServer(name, description, date.toIso8601String());
 
-                        // 저장 완료 후 녹음 화면으로 이동
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RecordScreen(
-                              meetingName: name,
-                              meetingDescription: description,
-                              meetingDate: date,
+                        // ⭐️ 만약 디렉토리 값을 성공적으로 받았다면, 녹음 화면으로 이동합니다.
+                        if (meetingDirectory != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RecordScreen(
+                                meetingName: name,
+                                meetingDescription: description,
+                                meetingDate: date,
+                                meetingDirectory: meetingDirectory, // ⭐️ 여기에 디렉토리 값을 전달합니다.
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        } else {
+                          // 에러가 발생한 경우 사용자에게 알림을 줍니다.
+                          print("회의를 생성하지 못했습니다. 다시 시도해주세요.");
+                        }
                       },
                     );
                   },
@@ -284,7 +295,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // 녹음 업로드
                 InkWell(
-
                   onTap: () {
                     CustomDialogs.showInputDialogUpload(
                       context,
@@ -369,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             SizedBox(width: 20),
                             ...sortedDates.expand((date) {
-                              return data[date]! .map((meeting) {
+                              return data[date]!.map((meeting) {
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 10),
                                   child: GestureDetector(

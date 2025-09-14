@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
 class AzureSTTPage extends StatefulWidget {
   final String meetingName;
   final String meetingDescription;
@@ -31,6 +30,11 @@ class AzureSTTPageState extends State<AzureSTTPage> {
   bool isRecording = false;
   List<String> transcript = [];
   final ScrollController _scrollController = ScrollController();
+
+  int _seconds = 0;
+  Timer? _timer;
+
+  List<double> _waveform = List.generate(50, (index) => 0.0);
 
   final baseUrl = dotenv.env['AZURE_API_TEST'];
 
@@ -109,8 +113,22 @@ class AzureSTTPageState extends State<AzureSTTPage> {
       numChannels: 1,
     );
 
+    recorder.setSubscriptionDuration(const Duration(milliseconds: 100));
+    recorder.onProgress!.listen((e) {
+      if (mounted) {
+        setState(() {
+          final double normalizedValue = (e.decibels ?? -120) * -1 / 120;
+          _waveform.add(normalizedValue);
+          if (_waveform.length > 50) {
+            _waveform.removeAt(0);
+          }
+        });
+      }
+    });
+
     if (mounted) {
       setState(() => isRecording = true);
+      _startTimer();
     }
   }
 
@@ -123,9 +141,25 @@ class AzureSTTPageState extends State<AzureSTTPage> {
     if (!_audioController.isClosed) {
       await _audioController.close();
     }
-    if (mounted) {
-      setState(() => isRecording = false);
-    }
+
+    _stopTimer();
+    setState(() {
+      isRecording = false;
+      _seconds = 0;
+      _waveform = List.generate(50, (index) => 0.0);
+    });
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _seconds = timer.tick;
+      });
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
   }
 
   @override
@@ -138,6 +172,7 @@ class AzureSTTPageState extends State<AzureSTTPage> {
     if (_audioController.hasListener && !_audioController.isClosed) {
       _audioController.close();
     }
+    _stopTimer();
     _scrollController.dispose();
     super.dispose();
   }
@@ -145,21 +180,32 @@ class AzureSTTPageState extends State<AzureSTTPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.meetingName)),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text('티노 사용 방법', style: TextStyle(color: Colors.black)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.blueAccent),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: Column(
         children: [
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: isRecording ? stopRecording : startRecording,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isRecording ? Colors.redAccent : Colors.blueAccent,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              textStyle: const TextStyle(fontSize: 18),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '실시간 대화 기록',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
             ),
-            child: Text(isRecording ? "⏹ 녹음 중지" : "🎙 녹음 시작"),
           ),
-          const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -168,10 +214,10 @@ class AzureSTTPageState extends State<AzureSTTPage> {
                 return Align(
                   alignment: Alignment.centerLeft,
                   child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Colors.grey[100],
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
@@ -180,15 +226,171 @@ class AzureSTTPageState extends State<AzureSTTPage> {
                     ),
                     child: Text(
                       transcript[index],
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ),
                 );
               },
             ),
           ),
+          Container(
+            height: isRecording ? 180 : 150, // 녹음 상태에 따라 높이 조절
+            color: Colors.white,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: isRecording
+                      ? Column(
+                    children: [
+                      Container(
+                        height: 50,
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Positioned(
+                              left: 30,
+                              child: SizedBox(
+                                width: 150,
+                                height: 50,
+                                child: CustomPaint(
+                                  painter: WaveformPainter(_waveform),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 200,
+                              child: Text(
+                                '${_seconds.toString().padLeft(2, '0')}s',
+                                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black54),
+                              ),
+                            ),
+                            Positioned(
+                              right: 80,
+                              child: GestureDetector(
+                                onTap: stopRecording,
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.red,
+                                    border: Border.all(color: Colors.black, width: 2),
+                                  ),
+                                  child: const Icon(Icons.stop, color: Colors.white, size: 20),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              right: 20,
+                              child: GestureDetector(
+                                onTap: () {
+                                  // 일시정지 기능 구현
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey[300],
+                                    border: Border.all(color: Colors.black, width: 2),
+                                  ),
+                                  child: const Icon(Icons.pause, color: Colors.black, size: 20),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildIconButton(Icons.search, '검색', Colors.blueAccent),
+                          _buildIconButton(Icons.comment, '의견 물어보기', Colors.blueAccent),
+                        ],
+                      ),
+                    ],
+                  )
+                      : Center(
+                    child: GestureDetector(
+                      onTap: startRecording,
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blueAccent,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.mic,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildIconButton(IconData icon, String label, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            border: Border.all(color: Colors.grey[400]!, width: 1),
+          ),
+          child: Icon(icon, size: 30, color: Colors.blueAccent),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.black87)),
+      ],
+    );
+  }
+}
+
+class WaveformPainter extends CustomPainter {
+  final List<double> waveform;
+  WaveformPainter(this.waveform);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2.0;
+
+    final barWidth = size.width / waveform.length;
+    for (int i = 0; i < waveform.length; i++) {
+      final barHeight = waveform[i] * size.height;
+      final x = i * barWidth;
+      final y = (size.height - barHeight) / 2;
+      canvas.drawLine(Offset(x, y), Offset(x, y + barHeight), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }

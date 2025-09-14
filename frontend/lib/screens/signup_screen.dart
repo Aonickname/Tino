@@ -114,75 +114,78 @@ class _SignupScreenState extends State<SignupScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              // 'Sign Up' 제목
-              const Text(
-                'Sign Up',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 40),
-              // 'Username' 입력 필드
-              _buildTextField('Username', _usernameController),
-              const SizedBox(height: 15),
-              // 'Email' 입력 필드
-              _buildTextField('Email', _emailController),
-              const SizedBox(height: 15),
-              // 'Password' 입력 필드
-              _buildTextField('Password', _passwordController, isPassword: true),
-              const SizedBox(height: 15),
-              // 'Confirm Password' 입력 필드
-              _buildTextField('Confirm Password', _confirmPasswordController, isPassword: true),
-
-              const SizedBox(height: 30),
-              // 'Sign Up' 버튼
-              ElevatedButton(
-                onPressed: _signup, // API 호출 함수 연결
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  elevation: 5,
-                ),
-                child: const Text(
+        // 여기를 SingleChildScrollView로 감싸줍니다.
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                // 'Sign Up' 제목
+                const Text(
                   'Sign Up',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              // 'Log In' 링크
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Allready have an account?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      );
-                    },
-                    child: const Text(
-                      '로그인',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
+                const SizedBox(height: 40),
+                // 'Username' 입력 필드
+                _buildTextField('Username', _usernameController),
+                const SizedBox(height: 15),
+                // 'Email' 입력 필드
+                _buildTextField('Email', _emailController),
+                const SizedBox(height: 15),
+                // 'Password' 입력 필드
+                _buildTextField('Password', _passwordController, isPassword: true),
+                const SizedBox(height: 15),
+                // 'Confirm Password' 입력 필드
+                _buildTextField('Confirm Password', _confirmPasswordController, isPassword: true),
+
+                const SizedBox(height: 30),
+                // 'Sign Up' 버튼
+                ElevatedButton(
+                  onPressed: _signup, // API 호출 함수 연결
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    elevation: 5,
+                  ),
+                  child: const Text(
+                    'Sign Up',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // 'Log In' 링크
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Allready have an account?"),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        );
+                      },
+                      child: const Text(
+                        '로그인',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
