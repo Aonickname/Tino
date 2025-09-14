@@ -1,5 +1,3 @@
-// record_screen.dart
-
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -9,6 +7,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'package:tino/widgets/dialog.dart';
+import 'dart:convert'; // jsonEncode를 위해 추가
 
 class RecordScreen extends StatefulWidget {
   final String meetingName;
@@ -139,28 +139,104 @@ class RecordScreenState extends State<RecordScreen> {
     }
   }
 
+  // Future<void> stopRecording() async {
+  //   print("⏹ 녹음 중지 버튼 눌림!");
+  //   await recorder.stopRecorder();
+  //   if (await recorder.isRecording) {
+  //     await recorder.closeRecorder();
+  //   }
+  //   if (!_audioController.isClosed) {
+  //     await _audioController.close();
+  //   }
+  //
+  //   // 웹소켓 연결을 끊고 리소스를 정리
+  //   channel.sink.close();
+  //
+  //   _stopTimer();
+  //   setState(() {
+  //     isRecording = false;
+  //     _seconds = 0;
+  //     _waveform = List.generate(50, (index) => 0.0);
+  //   });
+  //
+  //   // 녹음 종료 후 요약 다이얼로그 표시
+  //   CustomDialogs.showInputDialogSummary(
+  //     context,
+  //         (String summaryMode, String customPrompt) {
+  //       // 서버에 요약 요청 보내기
+  //       _requestSummary(summaryMode, customPrompt);
+  //     },
+  //   );
+  //
+  // }
+
+  // record_screen.dart 파일 내
+
+// record_screen.dart 파일 내
+
   Future<void> stopRecording() async {
     print("⏹ 녹음 중지 버튼 눌림!");
-    await recorder.stopRecorder();
-    if (await recorder.isRecording) {
-      await recorder.closeRecorder();
-    }
-    if (!_audioController.isClosed) {
-      await _audioController.close();
-    }
-
-    // ⭐️ 서버에 녹음 종료 메시지 전송
-    channel.sink.add("stop_recording");
-
-    // ⭐️ 웹소켓 연결을 끊고 리소스를 정리합니다.
-    channel.sink.close();
-
+    // ... 기존 코드 생략
     _stopTimer();
     setState(() {
       isRecording = false;
       _seconds = 0;
       _waveform = List.generate(50, (index) => 0.0);
     });
+
+    // await를 사용하여 다이얼로그가 반환하는 값을 받기
+    final result = await CustomDialogs.showInputDialogSummary(
+      context,
+          (String summaryMode, String customPrompt) {
+        // 서버에 요약 요청 보내기
+        _requestSummary(summaryMode, customPrompt);
+      },
+    );
+
+    // 다이얼로그에서 'true'를 반환하면 화면을 닫기
+    if (result == true) {
+      // 1. SnackBar 생성
+      const snackBar = SnackBar(
+        content: Text('요약 생성 중...!'),
+        duration: Duration(seconds: 3), // 3초간 표시
+      );
+
+      // 2. ScaffoldMessenger를 사용하여 SnackBar 표시
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      // 3. 1초 뒤에 화면을 닫기
+      await Future.delayed(const Duration(seconds: 1));
+      Navigator.of(context).pop();
+    }
+  }
+
+  // 서버에 요약 요청 보내기
+  Future<void> _requestSummary(String mode, String customPrompt) async {
+    final httpUrl = baseUrl!.replaceFirst('ws', 'http');
+    final url = Uri.parse('$httpUrl/summarize/${widget.meetingDirectory}');
+
+    print('✅ 요약 요청을 보냅니다: $url');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'mode': mode,
+          'custom_prompt': customPrompt,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        print('✅ 요약 성공: ${jsonResponse['summary']}');
+        // TODO: 요약된 내용을 화면에 표시하거나 저장하는 로직 추가
+      } else {
+        print('🔥 요약 실패: ${response.statusCode}, ${response.body}');
+        // TODO: 실패 알림 처리
+      }
+    } catch (e) {
+      print('🔥 HTTP 요청 실패: $e');
+    }
   }
 
   void _startTimer() {

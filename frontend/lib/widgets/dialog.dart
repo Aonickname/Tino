@@ -491,7 +491,155 @@ class CustomDialogs {
     );
   }
 
+  // static void showInputDialogSummary(
+  //     BuildContext context,
+  //     Function(String summaryMode, String customPrompt) onSubmit
+  //     ) {
+  //   TextEditingController customSummaryController = TextEditingController();
+  //   String selectedOption = '기본 회의록 방식으로 요약';
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return AlertDialog(
+  //             title: Text("회의 요약 방식 선택"),
+  //             content: SingleChildScrollView(
+  //               child: Column(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   // 요약 방식 드롭다운
+  //                   DropdownButton<String>(
+  //                     value: selectedOption,
+  //                     dropdownColor: Colors.white,
+  //                     onChanged: (String? newValue) {
+  //                       setState(() {
+  //                         selectedOption = newValue!;
+  //                       });
+  //                     },
+  //                     items: [
+  //                       '기본 회의록 방식으로 요약',
+  //                       '사용자 지정 요약'
+  //                     ].map((value) {
+  //                       return DropdownMenuItem(
+  //                         value: value,
+  //                         child: Text(value),
+  //                       );
+  //                     }).toList(),
+  //                   ),
+  //
+  //                   // 사용자 지정 요약 입력 필드 (조건부 표시)
+  //                   if (selectedOption == '사용자 지정 요약')
+  //                     TextField(
+  //                       controller: customSummaryController,
+  //                       decoration: InputDecoration(hintText: "요약 프롬프트 입력"),
+  //                     ),
+  //                 ],
+  //               ),
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () => Navigator.pop(context),
+  //                 style: TextButton.styleFrom(foregroundColor: Colors.black),
+  //                 child: Text("취소"),
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: () {
+  //                   String mode = selectedOption == '기본 회의록 방식으로 요약' ? "기본" : "사용자 지정";
+  //                   onSubmit(mode, customSummaryController.text);
+  //                   Navigator.pop(context);
+  //                 },
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: Colors.white,
+  //                   foregroundColor: Colors.black,
+  //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+  //                 ),
+  //                 child: Text("확인"),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
+// dialog.dart 파일 내
+  static Future<bool?> showInputDialogSummary(
+      BuildContext context,
+      Function(String summaryMode, String customPrompt) onSubmit
+      ) {
+    TextEditingController customSummaryController = TextEditingController();
+    String selectedOption = '기본 회의록 방식으로 요약';
+
+    return showDialog( // ⭐️ return을 추가해 showDialog의 결과를 반환합니다.
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("회의 요약 방식 선택"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 요약 방식 드롭다운
+                    DropdownButton<String>(
+                      value: selectedOption,
+                      dropdownColor: Colors.white,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedOption = newValue!;
+                        });
+                      },
+                      items: [
+                        '기본 회의록 방식으로 요약',
+                        '사용자 지정 요약'
+                      ].map((value) {
+                        return DropdownMenuItem(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+
+                    // 사용자 지정 요약 입력 필드 (조건부 표시)
+                    if (selectedOption == '사용자 지정 요약')
+                      TextField(
+                        controller: customSummaryController,
+                        decoration: InputDecoration(hintText: "요약 프롬프트 입력"),
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false), // ⭐️ 취소 버튼도 false를 반환하도록 수정
+                  style: TextButton.styleFrom(foregroundColor: Colors.black),
+                  child: Text("취소"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    String mode = selectedOption == '기본 회의록 방식으로 요약' ? "기본" : "사용자 지정";
+                    onSubmit(mode, customSummaryController.text);
+                    // '확인' 버튼을 누르면 true를 반환
+                    Navigator.pop(context, true);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  ),
+                  child: Text("확인"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
 
 
